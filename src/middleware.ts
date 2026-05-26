@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 
 const SUPERADMIN_EMAIL = 'elvessacapuri57@gmail.com'
 
@@ -16,7 +17,7 @@ const PROTECTED_PATHS = [
 
 const AUTH_PATHS = ['/login', '/signup', '/forgot-password']
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -70,7 +71,7 @@ export async function proxy(request: NextRequest) {
       return supabaseResponse
     }
 
-    const { data: subscription } = await supabase
+    const { data: subscription } = await supabaseAdmin
       .from('subscriptions')
       .select('status')
       .eq('user_id', user.id)
