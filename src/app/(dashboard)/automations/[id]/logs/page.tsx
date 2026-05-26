@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { use, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
@@ -100,7 +100,7 @@ export default function AutomationLogsPage({
 
       {logs.length === 0 ? (
         <div className="flex h-48 flex-col items-center justify-center rounded-xl border border-dashed border-slate-800 bg-slate-900/40">
-          <p className="text-sm text-white">No executions yet</p>
+          <p className="text-sm text-white">Ainda sem execuções</p>
           <p className="mt-1 text-xs text-slate-400">
             Trigger this automation to see runs here.
           </p>
@@ -127,10 +127,10 @@ export default function AutomationLogsPage({
                   <StatusBadge status={log.status} />
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-sm font-medium text-white">
-                      {log.contact?.name ?? log.contact?.phone ?? "Unknown contact"}
+                      {log.contact?.name ?? log.contact?.phone ?? "Contacto desconhecido"}
                     </div>
                     <div className="truncate text-xs text-slate-500">
-                      {log.trigger_event} · {log.steps_executed?.length ?? 0} step
+                      {log.trigger_event} · {log.steps_executed?.length ?? 0} passo
                       {log.steps_executed?.length === 1 ? "" : "s"}
                     </div>
                   </div>
@@ -150,7 +150,7 @@ export default function AutomationLogsPage({
                         <StepRow key={i} result={r} />
                       ))}
                       {(log.steps_executed ?? []).length === 0 && (
-                        <li className="text-xs text-slate-500">No steps recorded.</li>
+                        <li className="text-xs text-slate-500">Sem passos registados.</li>
                       )}
                     </ul>
                   </div>
@@ -203,3 +203,6 @@ function StepRow({ result }: { result: AutomationLogStepResult }) {
     </li>
   )
 }
+
+
+

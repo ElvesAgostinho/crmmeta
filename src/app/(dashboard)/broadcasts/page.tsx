@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -18,7 +18,7 @@ import { getBroadcastStatus } from '@/lib/broadcast-status';
 
 /**
  * Poll cadence while any broadcast is sending. Kept modest so we don't
- * beat on Supabase — the aggregate trigger in migration 003 keeps
+ * beat on Supabase â€” the aggregate trigger in migration 003 keeps
  * counts consistent; we just need to surface the freshest snapshot.
  */
 const POLL_INTERVAL_MS = 5_000;
@@ -74,7 +74,7 @@ export default function BroadcastsPage() {
       if (fetchError) throw fetchError;
       setBroadcasts(data ?? []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load broadcasts');
+      setError(err instanceof Error ? err.message : 'Não foi possível carregar as campanhas');
     } finally {
       setLoading(false);
     }
@@ -100,7 +100,7 @@ export default function BroadcastsPage() {
       pollTimer.current = null;
     }
 
-    // Pause polling while the tab is hidden — keeps Supabase cold when
+    // Pause polling while the tab is hidden â€” keeps Supabase cold when
     // the user is away, and ensures a fresh fetch the moment they
     // refocus so they don't see stale data on return.
     function handleVisibilityChange() {
@@ -138,7 +138,7 @@ export default function BroadcastsPage() {
       <div className="flex h-64 flex-col items-center justify-center gap-2">
         <p className="text-sm text-red-400">{error}</p>
         <Button variant="outline" onClick={() => window.location.reload()}>
-          Retry
+          Tentar novamente
         </Button>
       </div>
     );
@@ -176,9 +176,9 @@ export default function BroadcastsPage() {
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Broadcasts</h1>
+          <h1 className="text-2xl font-bold text-white">Campanhas</h1>
           <p className="mt-1 text-sm text-slate-400">
-            Send bulk messages to your contacts using approved templates.
+            Envie mensagens em massa aos seus contactos usando modelos aprovados.
           </p>
         </div>
         <Button
@@ -186,23 +186,23 @@ export default function BroadcastsPage() {
           className="bg-violet-600 text-white hover:bg-violet-700"
         >
           <Plus className="h-4 w-4" />
-          New Broadcast
+          Nova campanha
         </Button>
       </div>
 
       {broadcasts.length === 0 ? (
         <div className="flex h-64 flex-col items-center justify-center rounded-xl border border-slate-800 bg-slate-900">
           <Radio className="mb-3 h-10 w-10 text-slate-600" />
-          <p className="text-sm font-medium text-white">No broadcasts yet</p>
+          <p className="text-sm font-medium text-white">Ainda sem campanhas</p>
           <p className="mt-1 text-xs text-slate-400">
-            Create your first broadcast to reach your contacts at scale.
+            Crie a sua primeira campanha para chegar aos seus contactos em escala.
           </p>
           <Button
             onClick={() => router.push('/broadcasts/new')}
             className="mt-4 bg-violet-600 text-white hover:bg-violet-700"
           >
             <Plus className="h-4 w-4" />
-            New Broadcast
+            Nova campanha
           </Button>
         </div>
       ) : (
@@ -210,15 +210,15 @@ export default function BroadcastsPage() {
           <Table>
             <TableHeader>
               <TableRow className="border-slate-800 hover:bg-transparent">
-                <TableHead className="text-slate-400">Name</TableHead>
-                <TableHead className="hidden text-slate-400 md:table-cell">Template</TableHead>
+                <TableHead className="text-slate-400">Nome</TableHead>
+                <TableHead className="hidden text-slate-400 md:table-cell">Modelo</TableHead>
                 <TableHead className="hidden text-right text-slate-400 sm:table-cell">
-                  Recipients
+                  Destinatários
                 </TableHead>
-                <TableHead className="hidden text-slate-400 lg:table-cell">Delivery</TableHead>
-                <TableHead className="hidden text-slate-400 lg:table-cell">Read</TableHead>
-                <TableHead className="text-slate-400">Status</TableHead>
-                <TableHead className="hidden text-slate-400 sm:table-cell">Date</TableHead>
+                <TableHead className="hidden text-slate-400 lg:table-cell">Entrega</TableHead>
+                <TableHead className="hidden text-slate-400 lg:table-cell">Lido</TableHead>
+                <TableHead className="text-slate-400">Estado</TableHead>
+                <TableHead className="hidden text-slate-400 sm:table-cell">Data</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -279,3 +279,4 @@ export default function BroadcastsPage() {
     </div>
   );
 }
+

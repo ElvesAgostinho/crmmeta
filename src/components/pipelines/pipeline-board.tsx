@@ -16,6 +16,7 @@ import {
 } from "@dnd-kit/core";
 import type { Deal, PipelineStage } from "@/types";
 import { DealCard } from "./deal-card";
+import { formatStageName } from "./stage-labels";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
@@ -194,7 +195,7 @@ function StageColumn({
       />
       <div className="flex items-center justify-between pt-3">
         <h3 className="truncate text-sm font-semibold text-white">
-          {stage.name}
+          {formatStageName(stage.name)}
         </h3>
         <span className="shrink-0 rounded-full bg-slate-800 px-2 py-0.5 text-[11px] font-medium text-slate-300">
           {deals.length}
@@ -212,7 +213,7 @@ function StageColumn({
       >
         {deals.length === 0 ? (
           <div className="flex flex-1 items-center justify-center rounded-lg border-2 border-dashed border-slate-700 py-10 text-xs text-slate-500">
-            Drop a deal here
+            Largue um negócio aqui
           </div>
         ) : (
           deals.map((deal) => (
@@ -233,7 +234,7 @@ function StageColumn({
         className="mt-3 w-full justify-start border border-dashed border-slate-700 bg-transparent text-slate-400 hover:border-slate-600 hover:bg-slate-800 hover:text-white"
       >
         <Plus className="mr-1 h-3 w-3" />
-        Add Deal
+        Adicionar negócio
       </Button>
     </div>
   );

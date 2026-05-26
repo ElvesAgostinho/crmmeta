@@ -52,6 +52,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Shared across init, auth-state-change listener, and the exposed
   // refreshProfile() callback. Reads the current session's user id and
   // pulls the matching profile row.
+  const formatAuthError = (err: unknown) => {
+    if (err instanceof Error) return err.message
+    if (typeof err === 'string') return err
+    try {
+      return JSON.stringify(err)
+    } catch {
+      return String(err)
+    }
+  }
+
   const fetchProfile = useCallback(async (userId: string) => {
     const supabase = createClient();
     try {
@@ -62,12 +72,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .maybeSingle();
 
       if (error) {
-        console.error("[AuthProvider] fetchProfile error:", {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code,
-        });
+        console.error(
+          "[AuthProvider] fetchProfile error:",
+          formatAuthError(error),
+          error,
+        );
+        return;
+      }
+
+      if (!data) {
+        console.warn("[AuthProvider] fetchProfile warning: no profile data returned");
         return;
       }
 
@@ -153,7 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
-    window.location.href = "/login";
+    window.location.href = "/";
   }, []);
 
   const refreshProfile = useCallback(async () => {
@@ -184,7 +198,7 @@ export function useAuth(): AuthContextValue {
       profile: null,
       loading: false,
       signOut: async () => {
-        window.location.href = "/login";
+        window.location.href = "/";
       },
       refreshProfile: async () => {},
     };

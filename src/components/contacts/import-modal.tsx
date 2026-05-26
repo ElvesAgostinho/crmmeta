@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
@@ -109,7 +109,7 @@ export function ImportModal({ open, onOpenChange, onImported }: ImportModalProps
     const rows = parseCSV(text);
 
     if (rows.length === 0) {
-      toast.error('No valid rows found. Ensure CSV has a "phone" column header.');
+      toast.error('Nenhuma linha válida encontrada. Confirme que o CSV tem uma coluna "phone".');
       setParsedRows([]);
       return;
     }
@@ -185,7 +185,7 @@ export function ImportModal({ open, onOpenChange, onImported }: ImportModalProps
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="bg-slate-900 border-slate-700 text-slate-200 sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-white">Import Contacts</DialogTitle>
+          <DialogTitle className="text-white">Importar contactos</DialogTitle>
           <DialogDescription className="text-slate-400">
             Upload a CSV file with a &quot;phone&quot; column (required). Optional columns:
             name, email, company.
@@ -237,10 +237,10 @@ export function ImportModal({ open, onOpenChange, onImported }: ImportModalProps
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="bg-slate-800">
-                      <th className="px-3 py-1.5 text-left text-slate-400 font-medium">Phone</th>
-                      <th className="px-3 py-1.5 text-left text-slate-400 font-medium">Name</th>
-                      <th className="px-3 py-1.5 text-left text-slate-400 font-medium">Email</th>
-                      <th className="px-3 py-1.5 text-left text-slate-400 font-medium">Company</th>
+                      <th className="px-3 py-1.5 text-left text-slate-400 font-medium">Telefone</th>
+                      <th className="px-3 py-1.5 text-left text-slate-400 font-medium">Nome</th>
+                      <th className="px-3 py-1.5 text-left text-slate-400 font-medium">E-mail</th>
+                      <th className="px-3 py-1.5 text-left text-slate-400 font-medium">Empresa</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -292,7 +292,7 @@ export function ImportModal({ open, onOpenChange, onImported }: ImportModalProps
             onClick={() => handleOpenChange(false)}
             className="border-slate-700 text-slate-300 hover:bg-slate-800"
           >
-            {result ? 'Close' : 'Cancel'}
+            {result ? 'Fechar' : 'Cancelar'}
           </Button>
           {!result && (
             <Button
@@ -302,7 +302,7 @@ export function ImportModal({ open, onOpenChange, onImported }: ImportModalProps
               className="bg-violet-600 hover:bg-violet-700 text-white"
             >
               {importing && <Loader2 className="size-4 animate-spin" />}
-              Import {parsedRows.length > 0 ? `${parsedRows.length} Contacts` : ''}
+              Import {parsedRows.length > 0 ? `${parsedRows.length} Contactos` : ''}
             </Button>
           )}
         </DialogFooter>
@@ -310,3 +310,5 @@ export function ImportModal({ open, onOpenChange, onImported }: ImportModalProps
     </Dialog>
   );
 }
+
+

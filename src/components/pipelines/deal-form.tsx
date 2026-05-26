@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -55,7 +55,7 @@ export function DealForm({
   const [title, setTitle] = useState("");
   const [value, setValue] = useState("");
   const [currency, setCurrency] = useState("USD");
-  const [contactId, setContactId] = useState("");
+  const [contactId, setContactoId] = useState("");
   const [stageId, setStageId] = useState("");
   const [assignedTo, setAssignedTo] = useState("");
   const [expectedCloseDate, setExpectedCloseDate] = useState("");
@@ -84,7 +84,7 @@ export function DealForm({
       setCurrency(deal.currency || "USD");
       // contact_id is nullable when the contact has been deleted
       // (migration 004: ON DELETE SET NULL). "" means "no selection".
-      setContactId(deal.contact_id ?? "");
+      setContactoId(deal.contact_id ?? "");
       setStageId(deal.stage_id);
       setAssignedTo(deal.assigned_to ?? "");
       setExpectedCloseDate(deal.expected_close_date ?? "");
@@ -93,7 +93,7 @@ export function DealForm({
       setTitle("");
       setValue("");
       setCurrency("USD");
-      setContactId("");
+      setContactoId("");
       setStageId(defaultStageId || stages[0]?.id || "");
       setAssignedTo("");
       setExpectedCloseDate("");
@@ -171,7 +171,7 @@ export function DealForm({
         .update(payload)
         .eq("id", deal.id);
       if (error) {
-        toast.error("Failed to save deal");
+        toast.error("Não foi possível guardar o negócio");
         setSaving(false);
         return;
       }
@@ -189,14 +189,14 @@ export function DealForm({
         .from("deals")
         .insert({ ...payload, user_id: user.id, status: "open" });
       if (error) {
-        toast.error("Failed to create deal");
+        toast.error("Não foi possível criar o negócio");
         setSaving(false);
         return;
       }
     }
 
     setSaving(false);
-    toast.success(deal ? "Deal updated" : "Deal created");
+    toast.success(deal ? "Negócio actualizado" : "Negócio criado");
     onOpenChange(false);
     onSaved();
   }
@@ -210,7 +210,7 @@ export function DealForm({
       .eq("id", deal.id);
     setStatusAction(null);
     if (error) {
-      toast.error("Failed to update deal status");
+      toast.error("Não foi possível actualizar o estado do negócio");
       return;
     }
     toast.success(
@@ -226,10 +226,10 @@ export function DealForm({
     const { error } = await supabase.from("deals").delete().eq("id", deal.id);
     setDeleting(false);
     if (error) {
-      toast.error("Failed to delete deal");
+      toast.error("Não foi possível eliminar o negócio");
       return;
     }
-    toast.success("Deal deleted");
+    toast.success("Negócio eliminado");
     setConfirmDelete(false);
     onOpenChange(false);
     onSaved();
@@ -260,13 +260,13 @@ export function DealForm({
             </div>
 
             <div className="grid gap-2">
-              <Label className="text-slate-300">Contact</Label>
+              <Label className="text-slate-300">Contacto</Label>
               <select
                 value={contactId}
-                onChange={(e) => setContactId(e.target.value)}
+                onChange={(e) => setContactoId(e.target.value)}
                 className="h-9 w-full rounded-lg border border-slate-700 bg-slate-800 px-2.5 text-sm text-white outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
               >
-                <option value="">Select a contact</option>
+                <option value="">Seleccionar contacto</option>
                 {contacts.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name || c.phone}
@@ -423,7 +423,7 @@ export function DealForm({
                 onClick={() => onOpenChange(false)}
                 className="flex-1 border-slate-700 bg-transparent text-slate-300 hover:bg-slate-800"
               >
-                Cancel
+                Cancelar
               </Button>
               <Button
                 onClick={handleSave}
@@ -437,7 +437,7 @@ export function DealForm({
             {deal &&
               (confirmDelete ? (
                 <div className="mt-3 flex items-center justify-between gap-2 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs">
-                  <span className="text-red-300">Delete this deal?</span>
+                  <span className="text-red-300">Eliminar este negócio?</span>
                   <div className="flex gap-1">
                     <button
                       type="button"
@@ -445,7 +445,7 @@ export function DealForm({
                       disabled={deleting}
                       className="rounded px-2 py-1 text-slate-300 hover:bg-slate-800"
                     >
-                      Cancel
+                      Cancelar
                     </button>
                     <button
                       type="button"
@@ -473,3 +473,13 @@ export function DealForm({
     </Sheet>
   );
 }
+
+
+
+
+
+
+
+
+
+

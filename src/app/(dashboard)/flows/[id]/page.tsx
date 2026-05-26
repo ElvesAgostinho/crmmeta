@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -42,7 +42,7 @@ export default function FlowEditorPage() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`/api/flows/${params.id}`);
+        const res = await fetch(`/api/flows/${params.id}`, { credentials: "include" });
         if (res.status === 404) {
           if (!cancelled) setNotFound(true);
           return;
@@ -80,13 +80,13 @@ export default function FlowEditorPage() {
   if (notFound || !flow) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3">
-        <p className="text-sm text-slate-400">Flow not found.</p>
+        <p className="text-sm text-slate-400">Fluxo não encontrado.</p>
         <button
           type="button"
           onClick={() => router.push("/flows")}
           className="text-sm text-violet-400 hover:text-violet-300"
         >
-          ← Back to flows
+          â† Back to flows
         </button>
       </div>
     );
@@ -94,3 +94,4 @@ export default function FlowEditorPage() {
 
   return <FlowBuilder initialFlow={flow} initialNodes={nodes} />;
 }
+

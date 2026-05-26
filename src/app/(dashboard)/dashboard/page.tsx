@@ -11,14 +11,14 @@ import {
 
 import {
   loadActivity,
-  loadConversationsSeries,
+  loadConversationtionsSeries,
   loadMetrics,
   loadPipelineDonut,
   loadResponseTime,
 } from '@/lib/dashboard/queries'
 import type {
   ActivityItem,
-  ConversationsSeriesPoint,
+  ConversationtionsSeriesPoint,
   MetricsBundle,
   PipelineDonutData,
   ResponseTimeSummary,
@@ -27,10 +27,20 @@ import type {
 import { MetricCard } from '@/components/dashboard/metric-card'
 import { SkeletonCard } from '@/components/dashboard/skeleton'
 import { QuickActions } from '@/components/dashboard/quick-actions'
-import { ConversationsChart } from '@/components/dashboard/conversations-chart'
+import { ConversationtionsChart } from '@/components/dashboard/conversations-chart'
 import { PipelineDonut } from '@/components/dashboard/pipeline-donut'
 import { ResponseTimeChart } from '@/components/dashboard/response-time-chart'
 import { ActivityFeed } from '@/components/dashboard/activity-feed'
+
+function dashboardError(label: string, err: unknown) {
+  const message =
+    err instanceof Error
+      ? err.message
+      : typeof err === 'object' && err !== null
+      ? JSON.stringify(err)
+      : String(err)
+  console.error(`[dashboard] ${label} failed:`, message, err)
+}
 
 type RangeDays = 7 | 30 | 90
 
@@ -42,7 +52,7 @@ export default function DashboardPage() {
   // Keep a cache per range so switching tabs doesn't re-fetch what we
   // already have. Ranges the user hasn't opened yet stay null and
   // trigger a fetch on first view.
-  const [series, setSeries] = useState<Record<RangeDays, ConversationsSeriesPoint[] | null>>({
+  const [series, setSeries] = useState<Record<RangeDays, ConversationtionsSeriesPoint[] | null>>({
     7: null,
     30: null,
     90: null,
@@ -66,22 +76,22 @@ export default function DashboardPage() {
     // sections — each widget shows its own skeleton independently.
     void loadMetrics(db)
       .then((m) => setMetrics(m))
-      .catch((err) => console.error('[dashboard] metrics failed:', err))
+      .catch((err) => dashboardError('metrics', err))
       .finally(() => setMetricsLoading(false))
 
-    void loadConversationsSeries(db, 30)
+    void loadConversationtionsSeries(db, 30)
       .then((s) => setSeries((prev) => ({ ...prev, 30: s })))
-      .catch((err) => console.error('[dashboard] series failed:', err))
+      .catch((err) => dashboardError('series', err))
       .finally(() => setSeriesLoading(false))
 
     void loadPipelineDonut(db)
       .then((p) => setPipeline(p))
-      .catch((err) => console.error('[dashboard] pipeline failed:', err))
+      .catch((err) => dashboardError('pipeline', err))
       .finally(() => setPipelineLoading(false))
 
     void loadResponseTime(db)
       .then((r) => setResponseTime(r))
-      .catch((err) => console.error('[dashboard] response time failed:', err))
+      .catch((err) => dashboardError('response time', err))
       .finally(() => setResponseTimeLoading(false))
 
     // Fetch up to 50 so the biggest page-size option in the feed
@@ -107,9 +117,9 @@ export default function DashboardPage() {
       if (series[r] !== null) return
       setSeriesLoading(true)
       const db = createClient()
-      loadConversationsSeries(db, r)
+      loadConversationtionsSeries(db, r)
         .then((s) => setSeries((prev) => ({ ...prev, [r]: s })))
-        .catch((err) => console.error('[dashboard] series failed:', err))
+        .catch((err) => dashboardError('series', err))
         .finally(() => setSeriesLoading(false))
     },
     [series],
@@ -119,9 +129,9 @@ export default function DashboardPage() {
     <div className="space-y-5">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-white">Painel</h1>
         <p className="mt-1 text-sm text-slate-400">
-          Live analytics across conversations, contacts, deals, broadcasts, and automations.
+          Análises em tempo real sobre conversas, contactos, negócios, campanhas e automações.
         </p>
       </div>
 
@@ -132,16 +142,16 @@ export default function DashboardPage() {
         ) : (
           <>
             <MetricCard
-              title="Active Conversations"
-              value={metrics.activeConversations.current.toLocaleString()}
+              title="Conversas activas"
+              value={metrics.activeConversationtions.current.toLocaleString()}
               icon={MessageSquare}
               delta={{
-                sign: metrics.activeConversations.previous,
-                label: deltaLabel(metrics.activeConversations.previous, 'new today vs yesterday'),
+                sign: metrics.activeConversationtions.previous,
+                label: deltaLabel(metrics.activeConversationtions.previous, 'novas hoje face a ontem'),
               }}
             />
             <MetricCard
-              title="New Contacts Today"
+              title="Novos contactos hoje"
               value={metrics.newContactsToday.current.toLocaleString()}
               icon={UserPlus}
               delta={{
@@ -149,18 +159,18 @@ export default function DashboardPage() {
                   metrics.newContactsToday.current - metrics.newContactsToday.previous,
                 label: deltaLabel(
                   metrics.newContactsToday.current - metrics.newContactsToday.previous,
-                  'vs yesterday',
+                  'face a ontem',
                 ),
               }}
             />
             <MetricCard
-              title="Open Deals Value"
+              title="Valor dos negócios abertos"
               value={formatCurrency(metrics.openDealsValue)}
               icon={DollarSign}
-              subtitle={`${metrics.openDealsCount} open deal${metrics.openDealsCount === 1 ? '' : 's'}`}
+              subtitle={`${metrics.openDealsCount} negócio${metrics.openDealsCount === 1 ? ' aberto' : 's abertos'}`}
             />
             <MetricCard
-              title="Messages Sent Today"
+              title="Mensagens enviadas hoje"
               value={metrics.messagesSentToday.current.toLocaleString()}
               icon={Send}
               delta={{
@@ -168,7 +178,7 @@ export default function DashboardPage() {
                   metrics.messagesSentToday.current - metrics.messagesSentToday.previous,
                 label: deltaLabel(
                   metrics.messagesSentToday.current - metrics.messagesSentToday.previous,
-                  'vs yesterday',
+                  'face a ontem',
                 ),
               }}
             />
@@ -188,7 +198,7 @@ export default function DashboardPage() {
           height while the line chart drove the row height. */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
         <div className="h-full lg:col-span-3">
-          <ConversationsChart
+          <ConversationtionsChart
             series={series}
             loading={seriesLoading}
             range={range}
@@ -221,7 +231,7 @@ function formatCurrency(v: number): string {
 }
 
 function deltaLabel(delta: number, suffix: string): string {
-  if (delta === 0) return `No change ${suffix}`
+  if (delta === 0) return `Sem alteração ${suffix}`
   const sign = delta > 0 ? '+' : ''
   return `${sign}${delta.toLocaleString()} ${suffix}`
 }

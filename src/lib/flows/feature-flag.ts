@@ -16,7 +16,7 @@
  *     single import path.
  *
  * The function takes a minimal shape (anything with an optional
- * `beta_features` array of strings) rather than the full `Profile`
+ * `beta_features` array of strings) rather than the full `Perfil`
  * type so it can be called from places that haven't loaded a full
  * profile row — e.g. webhook handlers that only SELECT this one
  * column.

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -20,10 +20,10 @@ interface ConversationListProps {
   activeConversationId: string | null;
   onSelect: (conversation: Conversation) => void;
   conversations: Conversation[];
-  onConversationsLoaded: (conversations: Conversation[]) => void;
+  onConversationtionsLoaded: (conversations: Conversation[]) => void;
   /**
    * Increment to force the fetch effect below to refire. The parent
-   * bumps this on realtime reconnect / tab visibility → visible so the
+   * bumps this on realtime reconnect / tab visibility â†’ visible so the
    * list catches up on any events sent while the WS was disconnected
    * or the tab was throttled. Optional so existing callers keep working.
    */
@@ -37,17 +37,17 @@ const STATUS_COLORS: Record<ConversationStatus, string> = {
 };
 
 const FILTER_OPTIONS: { label: string; value: ConversationStatus | "all" }[] = [
-  { label: "All", value: "all" },
-  { label: "Open", value: "open" },
-  { label: "Pending", value: "pending" },
-  { label: "Closed", value: "closed" },
+  { label: "Todos", value: "all" },
+  { label: "Aberto", value: "open" },
+  { label: "Pendente", value: "pending" },
+  { label: "Fechado", value: "closed" },
 ];
 
 export function ConversationList({
   activeConversationId,
   onSelect,
   conversations,
-  onConversationsLoaded,
+  onConversationtionsLoaded,
   resyncToken = 0,
 }: ConversationListProps) {
   const [search, setSearch] = useState("");
@@ -56,19 +56,19 @@ export function ConversationList({
 
   // Keep the latest callback in a ref so the fetch effect below can
   // have a stable, empty-dep identity. Previously the fetch useCallback
-  // depended on `onConversationsLoaded`, which depends on the parent's
-  // `deepLinkConvId` — so every URL change (including one the parent
+  // depended on `onConversationtionsLoaded`, which depends on the parent's
+  // `deepLinkConvId` â€” so every URL change (including one the parent
   // triggered via router.replace after a click) caused a fresh
   // conversations fetch. That extra refetch was the trigger for the
   // deep-link auto-select running a second time and wiping the active
   // thread's messages.
   // Mutation lives in an effect (not render) per React 19's refs rule;
   // the fetch runs once on mount so it's fine to read the slightly
-  // older value — the very next render updates the ref for any
+  // older value â€” the very next render updates the ref for any
   // subsequent async completion.
-  const onConversationsLoadedRef = useRef(onConversationsLoaded);
+  const onConversationtionsLoadedRef = useRef(onConversationtionsLoaded);
   useEffect(() => {
-    onConversationsLoadedRef.current = onConversationsLoaded;
+    onConversationtionsLoadedRef.current = onConversationtionsLoaded;
   });
 
   useEffect(() => {
@@ -84,7 +84,7 @@ export function ConversationList({
       if (cancelled) return;
 
       if (error) {
-        // Supabase errors have non-enumerable properties — log fields explicitly
+        // Supabase errors have non-enumerable properties â€” log fields explicitly
         console.error("Failed to fetch conversations:", {
           message: error.message,
           details: error.details,
@@ -95,7 +95,7 @@ export function ConversationList({
         return;
       }
 
-      onConversationsLoadedRef.current(data ?? []);
+      onConversationtionsLoadedRef.current(data ?? []);
       setLoading(false);
     })();
 
@@ -103,7 +103,7 @@ export function ConversationList({
       cancelled = true;
     };
     // `resyncToken` is included so the parent can force a refetch when
-    // the realtime channel reconnects or the tab regains focus — catches
+    // the realtime channel reconnects or the tab regains focus â€” catches
     // up on any events sent while the WS was disconnected or throttled.
   }, [resyncToken]);
 
@@ -162,7 +162,7 @@ export function ConversationList({
 
         <DropdownMenu>
           <DropdownMenuTrigger className="inline-flex items-center justify-center h-7 gap-1 px-2 text-xs text-slate-400 hover:text-white rounded-md hover:bg-slate-800">
-              {activeFilter?.label ?? "All"}
+              {activeFilter?.label ?? "Todos"}
               <ChevronDown className="h-3 w-3" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -195,7 +195,7 @@ export function ConversationList({
           </div>
         ) : filtered.length === 0 ? (
           <div className="px-4 py-12 text-center">
-            <p className="text-sm text-slate-500">No conversations found</p>
+            <p className="text-sm text-slate-500">Nenhuma conversa encontrada</p>
           </div>
         ) : (
           <div className="flex flex-col">
@@ -270,7 +270,7 @@ function ConversationItem({
         </div>
         <div className="mt-0.5 flex items-center justify-between gap-2">
           <p className="truncate text-xs text-slate-400">
-            {conversation.last_message_text || "No messages yet"}
+            {conversation.last_message_text || "Ainda não existem mensagens"}
           </p>
           <div className="flex shrink-0 items-center gap-1.5">
             {conversation.unread_count > 0 && (
@@ -291,3 +291,4 @@ function ConversationItem({
     </button>
   );
 }
+

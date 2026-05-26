@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -121,7 +121,7 @@ const RECIPIENT_STATUSES: readonly RecipientStatus[] = [
 ];
 
 /**
- * CSV export helper — RFC 4180 quoting. Quote every field so
+ * CSV export helper â€” RFC 4180 quoting. Quote every field so
  * commas/newlines/quotes round-trip cleanly.
  */
 function toCsv(rows: string[][]): string {
@@ -199,9 +199,9 @@ export default function BroadcastDetailPage() {
   function handleExport() {
     if (!broadcast) return;
     const header = [
-      'Contact',
-      'Phone',
-      'Status',
+      'Contacto',
+      'Telefone',
+      'Estado',
       'Sent At',
       'Delivered At',
       'Read At',
@@ -227,7 +227,7 @@ export default function BroadcastDetailPage() {
     setDeleting(true);
     const supabase = createClient();
     // broadcast_recipients cascades on broadcasts.id (migration 001), so a
-    // single delete is sufficient — the aggregate trigger in migration 003
+    // single delete is sufficient â€” the aggregate trigger in migration 003
     // is defined on broadcast_recipients but fires only on its own row
     // changes, not on a cascaded drop of the parent row.
     const { error: delErr } = await supabase
@@ -236,10 +236,10 @@ export default function BroadcastDetailPage() {
       .eq('id', broadcastId);
     setDeleting(false);
     if (delErr) {
-      toast.error(`Failed to delete: ${delErr.message}`);
+      toast.error(`Não foi possível eliminar: ${delErr.message}`);
       return;
     }
-    toast.success('Broadcast deleted');
+    toast.success('Campanha eliminada');
     router.push('/broadcasts');
   }
 
@@ -254,9 +254,9 @@ export default function BroadcastDetailPage() {
   if (error || !broadcast) {
     return (
       <div className="flex h-64 flex-col items-center justify-center gap-2">
-        <p className="text-sm text-red-400">{error ?? 'Broadcast not found'}</p>
+        <p className="text-sm text-red-400">{error ?? 'Campanha não encontrada'}</p>
         <Button variant="outline" onClick={() => router.push('/broadcasts')}>
-          Back to Broadcasts
+          Voltar às campanhas
         </Button>
       </div>
     );
@@ -265,10 +265,10 @@ export default function BroadcastDetailPage() {
   const status = getBroadcastStatus(broadcast.status);
 
   const funnelSteps: FunnelStep[] = [
-    { label: 'Sent', value: broadcast.sent_count, color: 'bg-violet-500' },
-    { label: 'Delivered', value: broadcast.delivered_count, color: 'bg-teal-500' },
-    { label: 'Read', value: broadcast.read_count, color: 'bg-blue-500' },
-    { label: 'Replied', value: broadcast.replied_count, color: 'bg-indigo-500' },
+    { label: 'Enviado', value: broadcast.sent_count, color: 'bg-violet-500' },
+    { label: 'Entregue', value: broadcast.delivered_count, color: 'bg-teal-500' },
+    { label: 'Lido', value: broadcast.read_count, color: 'bg-blue-500' },
+    { label: 'Respondido', value: broadcast.replied_count, color: 'bg-indigo-500' },
   ];
 
   return (
@@ -297,19 +297,19 @@ export default function BroadcastDetailPage() {
               <span>Template: {broadcast.template_name}</span>
               <span>-</span>
               <span>
-                Created {new Date(broadcast.created_at).toLocaleDateString()}
+                Criada em {new Date(broadcast.created_at).toLocaleDateString()}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Delete — inline-confirm pattern matches the pipeline-settings
+        {/* Delete â€” inline-confirm pattern matches the pipeline-settings
             "Delete Pipeline" flow. Mid-send broadcasts can't be deleted
             because orphaning in-flight Meta messages would leave the
             funnel inconsistent. */}
         {confirmDelete ? (
           <div className="flex items-center gap-2 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-sm">
-            <span className="text-red-300">Delete this broadcast?</span>
+            <span className="text-red-300">Eliminar esta campanha?</span>
             <Button
               variant="outline"
               size="sm"
@@ -325,7 +325,7 @@ export default function BroadcastDetailPage() {
               disabled={deleting}
               className="h-7 bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
             >
-              {deleting ? 'Deleting…' : 'Confirm'}
+              {deleting ? 'Deletingâ€¦' : 'Confirm'}
             </Button>
           </div>
         ) : (
@@ -347,7 +347,7 @@ export default function BroadcastDetailPage() {
         )}
       </div>
 
-      {/* Stats — 6 cards: Total / Sent / Delivered / Read / Replied / Failed */}
+      {/* Stats â€” 6 cards: Total / Sent / Delivered / Read / Replied / Failed */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <StatCard
           label="Total Recipients"
@@ -357,35 +357,35 @@ export default function BroadcastDetailPage() {
           color="bg-slate-800 text-slate-300"
         />
         <StatCard
-          label="Sent"
+          label="Enviado"
           value={broadcast.sent_count}
           total={broadcast.total_recipients}
           icon={<Send className="h-4 w-4" />}
           color="bg-violet-500/10 text-violet-400"
         />
         <StatCard
-          label="Delivered"
+          label="Entregue"
           value={broadcast.delivered_count}
           total={broadcast.total_recipients}
           icon={<CheckCheck className="h-4 w-4" />}
           color="bg-teal-500/10 text-teal-400"
         />
         <StatCard
-          label="Read"
+          label="Lido"
           value={broadcast.read_count}
           total={broadcast.total_recipients}
           icon={<Eye className="h-4 w-4" />}
           color="bg-blue-500/10 text-blue-400"
         />
         <StatCard
-          label="Replied"
+          label="Respondido"
           value={broadcast.replied_count}
           total={broadcast.total_recipients}
           icon={<MessageCircle className="h-4 w-4" />}
           color="bg-indigo-500/10 text-indigo-400"
         />
         <StatCard
-          label="Failed"
+          label="Falhou"
           value={broadcast.failed_count}
           total={broadcast.total_recipients}
           icon={<AlertCircle className="h-4 w-4" />}
@@ -470,12 +470,12 @@ export default function BroadcastDetailPage() {
             <Table>
               <TableHeader>
                 <TableRow className="border-slate-800 hover:bg-transparent">
-                  <TableHead className="text-slate-400">Contact</TableHead>
-                  <TableHead className="text-slate-400">Phone</TableHead>
-                  <TableHead className="text-slate-400">Status</TableHead>
-                  <TableHead className="text-slate-400">Sent</TableHead>
-                  <TableHead className="text-slate-400">Delivered</TableHead>
-                  <TableHead className="text-slate-400">Read</TableHead>
+                  <TableHead className="text-slate-400">Contacto</TableHead>
+                  <TableHead className="text-slate-400">Telefone</TableHead>
+                  <TableHead className="text-slate-400">Estado</TableHead>
+                  <TableHead className="text-slate-400">Enviado</TableHead>
+                  <TableHead className="text-slate-400">Entregue</TableHead>
+                  <TableHead className="text-slate-400">Lido</TableHead>
                   <TableHead className="text-slate-400">Error</TableHead>
                 </TableRow>
               </TableHeader>
@@ -526,3 +526,10 @@ export default function BroadcastDetailPage() {
     </div>
   );
 }
+
+
+
+
+
+
+

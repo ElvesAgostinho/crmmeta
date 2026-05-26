@@ -155,7 +155,7 @@ export async function POST(request: Request) {
             accessToken,
             to: variant,
             templateName: template_name,
-            language: template_language || 'en_US',
+            language: template_language || 'pt_PT',
             params: recipient.params ?? [],
           })
           sentMessageId = result.messageId

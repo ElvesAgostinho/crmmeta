@@ -6,7 +6,7 @@ import { encrypt, decrypt } from '@/lib/whatsapp/encryption'
 /**
  * GET /api/whatsapp/config
  *
- * Used by the "Test API Connection" button and by the page to check
+ * Used by the "Testar liga??o ? API" button and by the page to check
  * whether the saved config is healthy. Returns 200 in all non-auth cases
  * so the UI can render an appropriate message rather than show a 500.
  *
@@ -31,7 +31,7 @@ export async function GET() {
 
     const { data: config, error: configError } = await supabase
       .from('whatsapp_config')
-      .select('phone_number_id, access_token, status')
+      .select('phone_number_id, waba_id, access_token, status')
       .eq('user_id', user.id)
       .maybeSingle()
 
@@ -54,6 +54,12 @@ export async function GET() {
       )
     }
 
+    const configPayload = {
+      phone_number_id: config.phone_number_id,
+      waba_id: config.waba_id,
+      status: config.status,
+    }
+
     // Try to decrypt the stored token with the current ENCRYPTION_KEY.
     // If this fails, the key changed (or was never consistent across envs).
     let accessToken: string
@@ -67,7 +73,8 @@ export async function GET() {
           reason: 'token_corrupted',
           needs_reset: true,
           message:
-            'The stored access token cannot be decrypted with the current ENCRYPTION_KEY. This usually means the key changed, or it differs between environments (local vs Hostinger vs Vercel). Click "Reset Configuration" below, then re-save.',
+            'O token de acesso guardado não pode ser desencriptado com a ENCRYPTION_KEY actual. Isto normalmente significa que a chave mudou ou que é diferente entre ambientes (local vs Hostinger vs Vercel). Clique em "Repor configuração" abaixo e volte a guardar.',
+          config: configPayload,
         },
         { status: 200 }
       )
@@ -79,7 +86,7 @@ export async function GET() {
         phoneNumberId: config.phone_number_id,
         accessToken,
       })
-      return NextResponse.json({ connected: true, phone_info: phoneInfo })
+      return NextResponse.json({ connected: true, phone_info: phoneInfo, config: configPayload })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown Meta API error'
       console.error('[whatsapp/config GET] Meta API verification failed:', message)
@@ -88,6 +95,7 @@ export async function GET() {
           connected: false,
           reason: 'meta_api_error',
           message: `Meta API rejected the credentials: ${message}`,
+          config: configPayload,
         },
         { status: 200 }
       )
@@ -123,11 +131,78 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { phone_number_id, waba_id, access_token, verify_token } = body
 
-    if (!access_token || !phone_number_id) {
+    if (!phone_number_id) {
       return NextResponse.json(
-        { error: 'access_token and phone_number_id are required' },
+        { error: 'phone_number_id is required' },
         { status: 400 }
       )
+    }
+
+    const { data: existing, error: existingError } = await supabase
+      .from('whatsapp_config')
+      .select('id, access_token, verify_token')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (existingError) {
+      console.error('Error loading existing whatsapp_config:', existingError)
+      return NextResponse.json(
+        { error: 'Failed to load existing configuration' },
+        { status: 500 }
+      )
+    }
+
+    if (!access_token && !existing) {
+      return NextResponse.json(
+        { error: 'access_token is required for initial setup' },
+        { status: 400 }
+      )
+    }
+
+    let rawAccessToken: string
+    let encryptedAccessToken: string
+    if (access_token) {
+      rawAccessToken = access_token
+      try {
+        encryptedAccessToken = encrypt(access_token)
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Unknown encryption error'
+        console.error('Encryption failed:', message)
+        return NextResponse.json(
+          {
+            error:
+              'Failed to encrypt token. Check that ENCRYPTION_KEY is a valid 64-character hex string in your environment variables.',
+          },
+          { status: 500 }
+        )
+      }
+    } else if (existing) {
+      try {
+        rawAccessToken = decrypt(existing.access_token)
+        encryptedAccessToken = existing.access_token
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Unable to decrypt existing access token'
+        console.error('Stored access token decryption failed:', message)
+        return NextResponse.json(
+          {
+            error:
+              'Unable to use the stored access token. Reset your WhatsApp configuration and re-enter the credentials.',
+          },
+          { status: 400 }
+        )
+      }
+    } else {
+      return NextResponse.json(
+        { error: 'access_token is required for new configuration' },
+        { status: 400 }
+      )
+    }
+
+    let encryptedVerifyToken: string | null = null
+    if (verify_token !== undefined) {
+      encryptedVerifyToken = verify_token ? encrypt(verify_token) : null
+    } else if (existing) {
+      encryptedVerifyToken = existing.verify_token ?? null
     }
 
     // Verify credentials with Meta BEFORE saving
@@ -135,7 +210,7 @@ export async function POST(request: Request) {
     try {
       phoneInfo = await verifyPhoneNumber({
         phoneNumberId: phone_number_id,
-        accessToken: access_token,
+        accessToken: rawAccessToken,
       })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown Meta API error'
@@ -146,30 +221,8 @@ export async function POST(request: Request) {
       )
     }
 
-    // Encrypt sensitive tokens before storing
-    let encryptedAccessToken: string
-    let encryptedVerifyToken: string | null
-    try {
-      encryptedAccessToken = encrypt(access_token)
-      encryptedVerifyToken = verify_token ? encrypt(verify_token) : null
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown encryption error'
-      console.error('Encryption failed:', message)
-      return NextResponse.json(
-        {
-          error:
-            'Failed to encrypt token. Check that ENCRYPTION_KEY is a valid 64-character hex string in your environment variables.',
-        },
-        { status: 500 }
-      )
-    }
-
     // Upsert — overwrite any existing (possibly corrupted) config
-    const { data: existing } = await supabase
-      .from('whatsapp_config')
-      .select('id')
-      .eq('user_id', user.id)
-      .maybeSingle()
+    const existingId = existing?.id
 
     if (existing) {
       const { error: updateError } = await supabase
@@ -225,7 +278,7 @@ export async function POST(request: Request) {
  * DELETE /api/whatsapp/config
  *
  * Removes the authenticated user's WhatsApp configuration row.
- * Used by the "Reset Configuration" button to recover from a corrupted
+ * Used by the "Repor configuração" button to recover from a corrupted
  * encrypted token (mismatched ENCRYPTION_KEY across environments).
  */
 export async function DELETE() {

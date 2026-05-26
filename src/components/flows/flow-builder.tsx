@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 
 /**
  * Linear-list flow editor.
  *
  * The whole flow (header, trigger config, node list, validation panel)
  * is owned by this single component. State lives client-side as a
- * single `BuilderState` object; `Save` PUTs the whole structure to
+ * single `BuilderState` object; `Guardar` PUTs the whole structure to
  * `/api/flows/[id]`; `Activate` hits `/api/flows/[id]/activate`.
  *
  * Why one big file: keeps the diff between fields + the form code
@@ -73,7 +73,7 @@ interface FlowBuilderProps {
 }
 
 // ============================================================
-// Local state shape — mirrors the DB but the configs are typed
+// Local state shape â€” mirrors the DB but the configs are typed
 // loosely (Record<string, unknown>) since each node_type carries a
 // different shape. The sub-form components narrow as needed.
 // ============================================================
@@ -271,6 +271,7 @@ export function FlowBuilder({ initialFlow, initialNodes }: FlowBuilderProps) {
     try {
       const res = await fetch(`/api/flows/${initialFlow.id}`, {
         method: "PUT",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: state.name,
@@ -285,7 +286,7 @@ export function FlowBuilder({ initialFlow, initialNodes }: FlowBuilderProps) {
         const json = await res.json().catch(() => ({}));
         throw new Error(json.error ?? `Save failed: ${res.status}`);
       }
-      toast.success("Saved.");
+      toast.success("Guardado.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Save failed";
       toast.error(msg);
@@ -304,13 +305,14 @@ export function FlowBuilder({ initialFlow, initialNodes }: FlowBuilderProps) {
       setActivating(true);
       try {
         // Always save first so the activation validator sees the
-        // latest state — the user shouldn't have to remember "save
+        // latest state â€” the user shouldn't have to remember "save
         // then activate".
         if (next === "active") {
           await handleSave();
         }
         const res = await fetch(`/api/flows/${initialFlow.id}/activate`, {
           method: "POST",
+          credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ status: next }),
         });
@@ -345,6 +347,7 @@ export function FlowBuilder({ initialFlow, initialNodes }: FlowBuilderProps) {
     try {
       const res = await fetch(`/api/flows/${initialFlow.id}`, {
         method: "DELETE",
+        credentials: "include",
       });
       if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
       router.push("/flows");
@@ -460,7 +463,7 @@ export function FlowBuilder({ initialFlow, initialNodes }: FlowBuilderProps) {
         {state.nodes.length === 0 ? (
           <div className="rounded-lg border border-dashed border-slate-700 bg-slate-900/50 p-8 text-center text-sm text-slate-400">
             Add a <strong>Start</strong> node, then a <strong>Send buttons</strong>
-            {" "}node, then a <strong>Handoff</strong> — that&apos;s the welcome-menu
+            {" "}node, then a <strong>Handoff</strong> â€” that&apos;s the welcome-menu
             shape from the brief.
           </div>
         ) : (
@@ -610,7 +613,7 @@ function Header({
         onChange={(e) =>
           setState((s) => ({ ...s, description: e.target.value }))
         }
-        placeholder="Optional description (internal — customers don't see this)"
+        placeholder="Optional description (internal â€” customers don't see this)"
         className="bg-slate-900 text-sm"
       />
     </div>
@@ -648,7 +651,7 @@ function TriggerPanel({
       <h2 className="mb-3 text-sm font-semibold text-white">Trigger</h2>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <div>
-          <label className="mb-1 block text-xs text-slate-400">When…</label>
+          <label className="mb-1 block text-xs text-slate-400">Whenâ€¦</label>
           <Select
             value={state.trigger_type}
             onValueChange={(v) =>
@@ -738,7 +741,7 @@ function EntryPicker({
         onChange={(key) =>
           setState((s) => ({ ...s, entry_node_id: key }))
         }
-        placeholder="Pick the first node…"
+        placeholder="Pick the first nodeâ€¦"
         className="flex-1 max-w-xs"
       />
     </section>
@@ -746,7 +749,7 @@ function EntryPicker({
 }
 
 // ============================================================
-// Node card — collapsed summary + expanded config form
+// Node card â€” collapsed summary + expanded config form
 // ============================================================
 
 function NodeCard({
@@ -877,7 +880,7 @@ function NodeConfigForm({
     <div className="flex flex-col gap-3">
       <div>
         <label className="mb-1 block text-xs text-slate-400">
-          Node key (used internally — keep stable)
+          Node key (used internally â€” keep stable)
         </label>
         <Input
           value={node.node_key}
@@ -1070,7 +1073,7 @@ function SendButtonsForm({
       <div>
         <div className="mb-2 flex items-center justify-between">
           <label className="text-xs text-slate-400">
-            Buttons (1–3) — each one routes to a different next node
+            Buttons (1â€“3) â€” each one routes to a different next node
           </label>
         </div>
         <div className="flex flex-col gap-3">
@@ -1092,7 +1095,7 @@ function SendButtonsForm({
               <Input
                 value={b.title}
                 onChange={(e) => updateButton(i, { title: e.target.value })}
-                placeholder="Visible title (≤20 chars)"
+                placeholder="Visible title (â‰¤20 chars)"
                 className="bg-slate-800"
                 maxLength={20}
               />
@@ -1101,7 +1104,7 @@ function SendButtonsForm({
                 nodes={allNodes}
                 excludeKey={currentKey}
                 onChange={(v) => updateButton(i, { next_node_key: v ?? "" })}
-                placeholder="Next node…"
+                placeholder="Next nodeâ€¦"
               />
               <Button
                 variant="ghost"
@@ -1224,7 +1227,7 @@ function SendListForm({
       />
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <TextRow
-          label="Tap-to-expand button label (≤20 chars)"
+          label="Tap-to-expand button label (â‰¤20 chars)"
           value={cfg.button_label ?? ""}
           onChange={(v) => onUpdateConfig({ button_label: v })}
         />
@@ -1237,7 +1240,7 @@ function SendListForm({
 
       <div className="mt-2">
         <label className="mb-2 block text-xs text-slate-400">
-          Rows (1–10 total across all sections)
+          Rows (1â€“10 total across all sections)
         </label>
         {sections.map((section, sIdx) => (
           <div
@@ -1275,7 +1278,7 @@ function SendListForm({
                   onChange={(e) =>
                     updateRow(sIdx, rIdx, { title: e.target.value })
                   }
-                  placeholder="Row title (≤24)"
+                  placeholder="Row title (â‰¤24)"
                   className="bg-slate-800"
                   maxLength={24}
                 />
@@ -1286,7 +1289,7 @@ function SendListForm({
                   onChange={(v) =>
                     updateRow(sIdx, rIdx, { next_node_key: v ?? "" })
                   }
-                  placeholder="Next node…"
+                  placeholder="Next nodeâ€¦"
                 />
                 <Button
                   variant="ghost"
@@ -1349,12 +1352,12 @@ function ConditionForm({
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/tags").catch(() => null);
+        const res = await fetch("/api/tags", { credentials: "include" }).catch(() => null);
         if (!res || !res.ok) return;
         const json = (await res.json()) as { tags?: UserTag[] };
         if (!cancelled) setTags(json.tags ?? []);
       } catch {
-        // Tags endpoint absent on older deployments — fall back to a
+        // Tags endpoint absent on older deployments â€” fall back to a
         // plain text input so the condition is still authorable.
       }
     })();
@@ -1383,8 +1386,8 @@ function ConditionForm({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="var">Captured variable</SelectItem>
-              <SelectItem value="tag">Contact has tag</SelectItem>
-              <SelectItem value="contact_field">Contact field</SelectItem>
+              <SelectItem value="tag">Contacto tem etiqueta</SelectItem>
+              <SelectItem value="contact_field">Campo do contacto</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -1402,7 +1405,7 @@ function ConditionForm({
               onValueChange={(v) => onUpdateConfig({ subject_key: v })}
             >
               <SelectTrigger className="bg-slate-800">
-                <SelectValue placeholder="Pick a tag…" />
+                <SelectValue placeholder="Pick a tagâ€¦" />
               </SelectTrigger>
               <SelectContent>
                 {tags.map((t) => (
@@ -1418,7 +1421,7 @@ function ConditionForm({
               onValueChange={(v) => onUpdateConfig({ subject_key: v })}
             >
               <SelectTrigger className="bg-slate-800">
-                <SelectValue placeholder="Pick a field…" />
+                <SelectValue placeholder="Pick a fieldâ€¦" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="name">name</SelectItem>
@@ -1481,14 +1484,14 @@ function ConditionForm({
           allNodes={allNodes}
           currentKey={currentKey}
           onChange={(v) => onUpdateConfig({ true_next: v })}
-          label="If true → advance to"
+          label="If true â†’ advance to"
         />
         <NextNodeRow
           value={cfg.false_next ?? ""}
           allNodes={allNodes}
           currentKey={currentKey}
           onChange={(v) => onUpdateConfig({ false_next: v })}
-          label="If false → advance to"
+          label="If false â†’ advance to"
         />
       </div>
     </>
@@ -1519,12 +1522,12 @@ function SetTagForm({
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/tags").catch(() => null);
+        const res = await fetch("/api/tags", { credentials: "include" }).catch(() => null);
         if (!res || !res.ok) return;
         const json = (await res.json()) as { tags?: UserTag[] };
         if (!cancelled) setTags(json.tags ?? []);
       } catch {
-        // No tags endpoint — fall back to raw UUID input.
+        // No tags endpoint â€” fall back to raw UUID input.
       }
     })();
     return () => {
@@ -1547,7 +1550,7 @@ function SetTagForm({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="add">Add tag</SelectItem>
+              <SelectItem value="add">Adicionar etiqueta</SelectItem>
               <SelectItem value="remove">Remove tag</SelectItem>
             </SelectContent>
           </Select>
@@ -1560,7 +1563,7 @@ function SetTagForm({
               onValueChange={(v) => onUpdateConfig({ tag_id: v })}
             >
               <SelectTrigger className="bg-slate-800">
-                <SelectValue placeholder="Pick a tag…" />
+                <SelectValue placeholder="Pick a tagâ€¦" />
               </SelectTrigger>
               <SelectContent>
                 {tags.map((t) => (
@@ -1646,7 +1649,7 @@ function NextNodeRow({
         nodes={allNodes}
         excludeKey={currentKey}
         onChange={(v) => onChange(v ?? "")}
-        placeholder="Pick a next node…"
+        placeholder="Pick a next nodeâ€¦"
       />
     </div>
   );
@@ -1674,10 +1677,10 @@ function NodeKeySelect({
       onValueChange={(v) => onChange(v === "__none__" ? null : v)}
     >
       <SelectTrigger className={cn("bg-slate-800", className)}>
-        <SelectValue placeholder={placeholder ?? "—"} />
+        <SelectValue placeholder={placeholder ?? "â€”"} />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="__none__">— None —</SelectItem>
+        <SelectItem value="__none__">â€” None â€”</SelectItem>
         {options.map((n) => {
           const Icon = NODE_META[n.node_type].icon;
           return (
@@ -1737,7 +1740,7 @@ function AddNodeButton({ onAdd }: { onAdd: (type: NodeType) => void }) {
 }
 
 // ============================================================
-// Validation panel — bottom of the editor
+// Validation panel â€” bottom of the editor
 // ============================================================
 
 function ValidationPanel({ issues }: { issues: ValidationIssue[] }) {
@@ -1796,3 +1799,6 @@ function IssueLine({ issue }: { issue: ValidationIssue }) {
     </div>
   );
 }
+
+
+

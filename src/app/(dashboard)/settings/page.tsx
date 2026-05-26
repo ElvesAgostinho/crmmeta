@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Settings, MessageSquare, Tag, User } from 'lucide-react';
@@ -21,7 +21,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // The URL is the single source of truth for the active tab — no
+  // The URL is the single source of truth for the active tab - no
   // local state, no sync effect. A previous revision duplicated this
   // into `useState` + a sync effect, which tripped React 19's
   // set-state-in-effect rule and was also redundant.
@@ -37,10 +37,10 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Settings</h1>
+        <h1 className="text-2xl font-bold text-white">Definições</h1>
         <p className="text-sm text-slate-400 mt-1">
-          Manage your profile, WhatsApp® integration, message templates, and
-          tags.
+          Gerir o seu perfil, a integração com WhatsApp, os modelos de mensagem e
+          as etiquetas.
         </p>
       </div>
 
@@ -51,28 +51,28 @@ export default function SettingsPage() {
             className="data-active:bg-slate-800 data-active:text-violet-400 text-slate-400"
           >
             <User className="size-4" />
-            Profile
+            Perfil
           </TabsTrigger>
           <TabsTrigger
             value="whatsapp"
             className="data-active:bg-slate-800 data-active:text-violet-400 text-slate-400"
           >
             <Settings className="size-4" />
-            WhatsApp Config
+            Configuração do WhatsApp
           </TabsTrigger>
           <TabsTrigger
             value="templates"
             className="data-active:bg-slate-800 data-active:text-violet-400 text-slate-400"
           >
             <MessageSquare className="size-4" />
-            Templates
+            Modelos
           </TabsTrigger>
           <TabsTrigger
             value="tags"
             className="data-active:bg-slate-800 data-active:text-violet-400 text-slate-400"
           >
             <Tag className="size-4" />
-            Tags
+            Etiquetas
           </TabsTrigger>
         </TabsList>
 
@@ -97,3 +97,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+

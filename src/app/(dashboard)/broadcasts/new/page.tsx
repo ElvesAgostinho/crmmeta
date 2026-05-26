@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -13,10 +13,10 @@ import { useBroadcastSending } from '@/hooks/use-broadcast-sending';
 import { Check } from 'lucide-react';
 
 const steps = [
-  { label: 'Template', key: 'template' },
+  { label: 'Modelo', key: 'template' },
   { label: 'Audience', key: 'audience' },
   { label: 'Personalize', key: 'personalize' },
-  { label: 'Send', key: 'send' },
+  { label: 'Enviar', key: 'send' },
 ] as const;
 
 export default function NewBroadcastPage() {
@@ -59,16 +59,16 @@ export default function NewBroadcastPage() {
       });
       router.push(`/broadcasts/${broadcastId}`);
     } catch (err) {
-      // Previously swallowed with console.error — the wizard would
+      // Previously swallowed with console.error â€” the wizard would
       // just no-op, leaving the user confused. Surface the reason.
-      const message = err instanceof Error ? err.message : 'Broadcast failed';
+      const message = err instanceof Error ? err.message : 'A campanha falhou';
       console.error('Broadcast failed:', err);
       toast.error(message);
     }
   }
 
   /**
-   * Writes a draft broadcast row — no recipients, no sending. The user
+   * Writes a draft broadcast row â€” no recipients, no sending. The user
    * can revisit it via the list page to finish the flow later. We
    * don't persist the in-progress audience/variable config here
    * because the current schema doesn't carry it past `audience_filter`
@@ -95,7 +95,7 @@ export default function NewBroadcastPage() {
       user_id: user.id,
       name: name.trim(),
       template_name: template.name,
-      template_language: template.language ?? 'en_US',
+      template_language: template.language ?? 'pt_PT',
       template_variables: variables,
       audience_filter: {
         type: audience.type,
@@ -111,7 +111,7 @@ export default function NewBroadcastPage() {
     });
 
     if (error) {
-      toast.error(`Failed to save draft: ${error.message}`);
+      toast.error(`Não foi possível guardar o rascunho: ${error.message}`);
       return;
     }
     toast.success('Draft saved');
@@ -122,7 +122,7 @@ export default function NewBroadcastPage() {
     <div className="mx-auto max-w-3xl space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">New Broadcast</h1>
+        <h1 className="text-2xl font-bold text-white">Nova campanha</h1>
         <p className="mt-1 text-sm text-slate-400">
           Create and send a broadcast message to your contacts.
         </p>
@@ -220,3 +220,4 @@ export default function NewBroadcastPage() {
     </div>
   );
 }
+

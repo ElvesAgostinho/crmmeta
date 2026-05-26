@@ -22,7 +22,7 @@ export default function InboxPage() {
    */
   const deepLinkConvId = searchParams.get("c");
 
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversations, setConversationtions] = useState<Conversation[]>([]);
   const [activeConversation, setActiveConversation] =
     useState<Conversation | null>(null);
   const [activeContact, setActiveContact] = useState<Contact | null>(null);
@@ -74,7 +74,7 @@ export default function InboxPage() {
   // row's own columns — a brand-new conversation arrives without a
   // contact, which surfaced as "Unknown" names, empty avatars, and
   // (when the conv-INSERT event was delayed past the message-INSERT)
-  // conversations stuck on "No messages yet" until the user reloaded.
+  // conversations stuck on "Ainda não existem mensagens" until the user reloaded.
   // Also self-heals if a realtime event was missed: callers can invoke
   // this whenever they reference a conversation id they don't recognise.
   const hydrateConversation = useCallback(async (convId: string) => {
@@ -100,7 +100,7 @@ export default function InboxPage() {
       }
       if (!data) return;
       const fetched = data as Conversation;
-      setConversations((prev) => {
+      setConversationtions((prev) => {
         const existing = prev.find((c) => c.id === fetched.id);
         if (existing) {
           // Already in state — keep its fields (a realtime UPDATE may
@@ -174,7 +174,7 @@ export default function InboxPage() {
         // knownConvIdsRef for why a closure flag inside the updater would
         // always read false here.
         if (knownConvIdsRef.current.has(newMsg.conversation_id)) {
-          setConversations((prev) =>
+          setConversationtions((prev) =>
             prev.map((c) =>
               c.id === newMsg.conversation_id
                 ? {
@@ -225,7 +225,7 @@ export default function InboxPage() {
         // already have the row — that shouldn't happen normally, but
         // out-of-order delivery would have us prepending a duplicate.
         if (!knownConvIdsRef.current.has(conv.id)) {
-          setConversations((prev) => {
+          setConversationtions((prev) => {
             if (prev.some((c) => c.id === conv.id)) return prev;
             return [conv, ...prev];
           });
@@ -241,7 +241,7 @@ export default function InboxPage() {
           // back on for the ~100ms it takes for the reset effect's server
           // UPDATE to round-trip. Non-active convs take the value as-is.
           const isActive = activeConversation?.id === conv.id;
-          setConversations((prev) =>
+          setConversationtions((prev) =>
             prev.map((c) =>
               c.id === conv.id
                 ? {
@@ -334,9 +334,9 @@ export default function InboxPage() {
     setResyncToken((n) => n + 1);
   }, []);
 
-  const handleConversationsLoaded = useCallback(
+  const handleConversationtionsLoaded = useCallback(
     (loaded: Conversation[]) => {
-      setConversations(loaded);
+      setConversationtions(loaded);
       // Resolve a pending deep-link here rather than in an effect — this
       // is an event handler, so the setState calls below are allowed by
       // react-hooks/set-state-in-effect. Runs once per ?c=<id> URL value
@@ -355,7 +355,7 @@ export default function InboxPage() {
         // would setMessages([]) on a thread whose messages have
         // already been loaded by MessageThread — and because
         // conversationId didn't change, MessageThread wouldn't
-        // refetch. The thread would read "No messages yet" until a
+        // refetch. The thread would read "Ainda não existem mensagens" until a
         // full page reload rehydrated state from scratch.
         if (activeConversation?.id === deepLinkConvId) return;
         const match = loaded.find((c) => c.id === deepLinkConvId);
@@ -368,7 +368,7 @@ export default function InboxPage() {
           // same as a click. Leaves activeConversation.unread_count alone so
           // the MessageThread reset effect still fires the server UPDATE.
           if (match.unread_count > 0) {
-            setConversations((prev) =>
+            setConversationtions((prev) =>
               prev.map((c) =>
                 c.id === match.id ? { ...c, unread_count: 0 } : c,
               ),
@@ -399,7 +399,7 @@ export default function InboxPage() {
       // here means the user sees the badge disappear the instant they
       // click instead of waiting for the round-trip — and it persists
       // even if the realtime UPDATE is dropped.
-      setConversations((prev) =>
+      setConversationtions((prev) =>
         prev.map((c) =>
           c.id === conv.id && c.unread_count > 0
             ? { ...c, unread_count: 0 }
@@ -409,7 +409,7 @@ export default function InboxPage() {
       // Record the selection on the deep-link ref BEFORE we change the
       // URL. The router.replace below flips `deepLinkConvId`, which can
       // in turn cause ConversationList to refetch and eventually call
-      // handleConversationsLoaded again. Without this line, the ref
+      // handleConversationtionsLoaded again. Without this line, the ref
       // still points at the previous value, the auto-select block
       // sees `ref !== deepLinkConvId`, fires a second time, and
       // clobbers the messages MessageThread just fetched.
@@ -458,7 +458,7 @@ export default function InboxPage() {
 
   const handleStatusChange = useCallback(
     (conversationId: string, status: ConversationStatus) => {
-      setConversations((prev) =>
+      setConversationtions((prev) =>
         prev.map((c) => (c.id === conversationId ? { ...c, status } : c))
       );
       if (activeConversation?.id === conversationId) {
@@ -470,7 +470,7 @@ export default function InboxPage() {
 
   const handleAssignChange = useCallback(
     (conversationId: string, assignedAgentId: string | null) => {
-      setConversations((prev) =>
+      setConversationtions((prev) =>
         prev.map((c) =>
           c.id === conversationId
             ? { ...c, assigned_agent_id: assignedAgentId ?? undefined }
@@ -522,7 +522,7 @@ export default function InboxPage() {
             activeConversationId={activeConversation?.id ?? null}
             onSelect={handleSelectConversation}
             conversations={conversations}
-            onConversationsLoaded={handleConversationsLoaded}
+            onConversationtionsLoaded={handleConversationtionsLoaded}
             resyncToken={resyncToken}
           />
         </div>

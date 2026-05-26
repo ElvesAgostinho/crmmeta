@@ -343,7 +343,7 @@ export function useBroadcastSending(): UseBroadcastSendingReturn {
           user_id: user.id,
           name: payload.name,
           template_name: payload.template.name,
-          template_language: payload.template.language ?? 'en_US',
+          template_language: payload.template.language ?? 'pt_PT',
           template_variables: payload.variables,
           audience_filter: {
             type: payload.audience.type,
@@ -445,11 +445,12 @@ export function useBroadcastSending(): UseBroadcastSendingReturn {
         try {
           const res = await fetch('/api/whatsapp/broadcast', {
             method: 'POST',
+            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               recipients: apiRecipients,
               template_name: payload.template.name,
-              template_language: payload.template.language ?? 'en_US',
+              template_language: payload.template.language ?? 'pt_PT',
             }),
           });
 

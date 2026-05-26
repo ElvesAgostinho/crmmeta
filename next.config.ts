@@ -54,6 +54,14 @@ const SECURITY_HEADERS = [
 ] as const;
 
 const nextConfig: NextConfig = {
+  // Allow ngrok tunnel + local network access in dev mode.
+  // Next.js 16 blocks cross-origin dev requests by default.
+  allowedDevOrigins: [
+    'carli-unshelved-laurie.ngrok-free.dev',
+    'localhost',
+    '127.0.0.1',
+  ],
+
   /**
    * Cache-Control policy.
    *
@@ -125,6 +133,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  output: "standalone",
 };
 
 export default nextConfig;

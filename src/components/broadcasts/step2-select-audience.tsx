@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
@@ -47,7 +47,7 @@ const audienceOptions: {
 }[] = [
   {
     type: 'all',
-    label: 'All Contacts',
+    label: 'All Contactos',
     description: 'Send to every contact in your database',
     icon: Users,
   },
@@ -91,7 +91,7 @@ export function Step2SelectAudience({
   const [loadingCount, setLoadingCount] = useState(false);
 
   // Tags are used both by the primary "Filter by Tags" audience type
-  // AND by the exclude-list below — so always load once on mount.
+  // AND by the exclude-list below â€” so always load once on mount.
   useEffect(() => {
     async function fetchTags() {
       setLoadingTags(true);
@@ -130,11 +130,11 @@ export function Step2SelectAudience({
     try {
       const supabase = createClient();
 
-      // Base query — produces the superset before exclude is applied.
+      // Base query â€” produces the superset before exclude is applied.
       let baseIds: Set<string> | null = null; // null means "all contacts"
 
       if (audience.type === 'all') {
-        // Handled below — full-table count adjusted by excludes.
+        // Handled below â€” full-table count adjusted by excludes.
       } else if (
         audience.type === 'tags' &&
         audience.tagIds &&
@@ -168,7 +168,7 @@ export function Step2SelectAudience({
         setEstimatedCount(audience.csvContacts.length);
         return;
       } else {
-        // Partially-configured audience — wait for the user to finish.
+        // Partially-configured audience â€” wait for the user to finish.
         setEstimatedCount(null);
         return;
       }
@@ -189,7 +189,7 @@ export function Step2SelectAudience({
         );
         setEstimatedCount(effective.length);
       } else {
-        // "All" — fetch the total, then subtract exclude set if any.
+        // "Todos" â€” fetch the total, then subtract exclude set if any.
         const { count } = await supabase
           .from('contacts')
           .select('*', { count: 'exact', head: true });
@@ -249,7 +249,7 @@ export function Step2SelectAudience({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-white">Select Audience</h2>
+        <h2 className="text-lg font-semibold text-white">Seleccionar público</h2>
         <p className="mt-1 text-sm text-slate-400">
           Choose who will receive this broadcast.
         </p>
@@ -305,7 +305,7 @@ export function Step2SelectAudience({
 
       {audience.type === 'tags' && (
         <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
-          <p className="mb-3 text-sm font-medium text-white">Select Tags</p>
+          <p className="mb-3 text-sm font-medium text-white">Seleccionar etiquetas</p>
           {loadingTags ? (
             <Loader2 className="h-5 w-5 animate-spin text-violet-500" />
           ) : tags.length === 0 ? (
@@ -346,7 +346,7 @@ export function Step2SelectAudience({
             <Loader2 className="h-5 w-5 animate-spin text-violet-500" />
           ) : customFields.length === 0 ? (
             <p className="text-xs text-slate-400">
-              No custom fields defined. Create one in Settings → Custom Fields.
+              No custom fields defined. Create one in Settings â†’ Custom Fields.
             </p>
           ) : (
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_140px_minmax(0,1fr)]">
@@ -355,7 +355,7 @@ export function Step2SelectAudience({
                 onChange={(e) => updateCustomField({ fieldId: e.target.value })}
                 className="h-9 rounded-lg border border-slate-700 bg-slate-800 px-2.5 text-sm text-white outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
               >
-                <option value="">Select field…</option>
+                <option value="">Seleccionar campo...</option>
                 {customFields.map((f) => (
                   <option key={f.id} value={f.id}>
                     {f.field_name}
@@ -389,7 +389,7 @@ export function Step2SelectAudience({
         </div>
       )}
 
-      {/* Exclude list — applies regardless of audience type */}
+      {/* Exclude list â€” applies regardless of audience type */}
       <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
         <div className="mb-3 flex items-center gap-2">
           <X className="h-4 w-4 text-red-400" />
@@ -399,7 +399,7 @@ export function Step2SelectAudience({
           <span className="text-xs text-slate-500">(optional)</span>
         </div>
         {tags.length === 0 ? (
-          <p className="text-xs text-slate-500">No tags available.</p>
+          <p className="text-xs text-slate-500">Sem etiquetas disponíveis.</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {tags.map((tag) => {
@@ -432,7 +432,7 @@ export function Step2SelectAudience({
         {loadingCount ? (
           <div className="flex items-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin text-violet-500" />
-            <span className="text-xs text-slate-400">Calculating…</span>
+            <span className="text-xs text-slate-400">Calculatingâ€¦</span>
           </div>
         ) : estimatedCount !== null ? (
           <div className="flex items-center gap-2">
@@ -470,3 +470,8 @@ export function Step2SelectAudience({
     </div>
   );
 }
+
+
+
+
+

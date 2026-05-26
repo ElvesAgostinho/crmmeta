@@ -56,9 +56,9 @@ interface FlowRow {
 }
 
 const STATUS_LABELS: Record<FlowRow["status"], string> = {
-  draft: "Draft",
-  active: "Active",
-  archived: "Archived",
+  draft: "Rascunho",
+  active: "Activo",
+  archived: "Arquivado",
 };
 
 const STATUS_COLORS: Record<FlowRow["status"], string> = {
@@ -105,8 +105,8 @@ export default function FlowsPage() {
     (async () => {
       try {
         const [flowsRes, tmplRes] = await Promise.all([
-          fetch("/api/flows"),
-          fetch("/api/flows/templates"),
+          fetch("/api/flows", { credentials: "include" }),
+          fetch("/api/flows/templates", { credentials: "include" }),
         ]);
         if (!flowsRes.ok) {
           throw new Error(`Failed to load flows: ${flowsRes.status}`);
@@ -141,6 +141,7 @@ export default function FlowsPage() {
     try {
       const res = await fetch("/api/flows", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: newName.trim(),
@@ -166,6 +167,7 @@ export default function FlowsPage() {
     try {
       const res = await fetch("/api/flows", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ template_slug: slug }),
       });
@@ -190,7 +192,7 @@ export default function FlowsPage() {
     );
     if (!yes) return;
     try {
-      const res = await fetch(`/api/flows/${flow.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/flows/${flow.id}`, { method: "DELETE", credentials: "include" });
       if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
       setFlows((prev) => prev.filter((f) => f.id !== flow.id));
       toast.success("Flow deleted.");
@@ -212,7 +214,7 @@ export default function FlowsPage() {
     <div className="space-y-6 p-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Flows</h1>
+          <h1 className="text-2xl font-semibold text-white">Fluxos</h1>
           <p className="mt-1 text-sm text-slate-400">
             Build branching, button-driven WhatsApp conversations. Useful for
             menus, FAQs, and triage before a human steps in.
@@ -242,7 +244,7 @@ export default function FlowsPage() {
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="max-w-2xl bg-slate-900 text-slate-100">
           <DialogHeader>
-            <DialogTitle>Create a new flow</DialogTitle>
+            <DialogTitle>Criar novo fluxo</DialogTitle>
             <DialogDescription className="text-slate-400">
               Start from a template or build from scratch.
             </DialogDescription>

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
@@ -141,11 +141,11 @@ export function ContactForm({
         }
       }
 
-      toast.success(isEdit ? 'Contact updated' : 'Contact created');
+      toast.success(isEdit ? 'Contacto actualizado' : 'Contacto criado');
       onOpenChange(false);
       onSaved();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to save contact';
+      const message = err instanceof Error ? err.message : 'Não foi possível guardar o contacto';
       toast.error(message);
     } finally {
       setSaving(false);
@@ -157,7 +157,7 @@ export function ContactForm({
       <DialogContent className="bg-slate-900 border-slate-700 text-slate-200 sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-white">
-            {isEdit ? 'Edit Contact' : 'Add Contact'}
+            {isEdit ? 'Editar contacto' : 'Adicionar contacto'}
           </DialogTitle>
           <DialogDescription className="text-slate-400">
             {isEdit
@@ -175,7 +175,7 @@ export function ContactForm({
               id="cf-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="John Doe"
+              placeholder="Jo?o Silva"
               className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
             />
           </div>
@@ -224,7 +224,7 @@ export function ContactForm({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-slate-300">Tags</Label>
+            <Label className="text-slate-300">Etiquetas</Label>
             {loadingTags ? (
               <div className="flex items-center gap-2 text-slate-500 text-sm">
                 <Loader2 className="size-3 animate-spin" />
@@ -277,7 +277,7 @@ export function ContactForm({
               className="bg-violet-600 hover:bg-violet-700 text-white"
             >
               {saving && <Loader2 className="size-4 animate-spin" />}
-              {isEdit ? 'Update' : 'Create'}
+              {isEdit ? 'Actualizar' : 'Criar'}
             </Button>
           </DialogFooter>
         </form>
@@ -285,3 +285,4 @@ export function ContactForm({
     </Dialog>
   );
 }
+

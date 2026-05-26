@@ -10,10 +10,10 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "wacrm",
-    template: "%s — wacrm",
+    default: "CRM para WhatsApp",
+    template: "%s - CRM para WhatsApp",
   },
-  description: "Self-hostable CRM template for WhatsApp.",
+  description: "CRM profissional para WhatsApp Business.",
   robots: {
     index: false,
     follow: false,
@@ -39,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`}>
+    <html lang="pt-PT" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full bg-slate-950 text-white font-sans">
         {children}
         <Toaster

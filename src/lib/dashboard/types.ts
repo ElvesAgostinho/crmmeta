@@ -8,14 +8,14 @@ export interface MetricDelta {
 }
 
 export interface MetricsBundle {
-  activeConversations: MetricDelta
+  activeConversationtions: MetricDelta
   newContactsToday: MetricDelta
   openDealsValue: number
   openDealsCount: number
   messagesSentToday: MetricDelta
 }
 
-export interface ConversationsSeriesPoint {
+export interface ConversationtionsSeriesPoint {
   day: string // YYYY-MM-DD local
   incoming: number
   outgoing: number

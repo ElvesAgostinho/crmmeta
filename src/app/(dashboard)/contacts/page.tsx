@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
@@ -103,7 +103,7 @@ export default function ContactsPage() {
     const { data, count, error } = await query;
 
     if (error) {
-      toast.error('Failed to load contacts');
+      toast.error('Não foi possível carregar os contactos');
       setLoading(false);
       return;
     }
@@ -190,9 +190,9 @@ export default function ContactsPage() {
       .eq('id', deleteTarget.id);
 
     if (error) {
-      toast.error('Failed to delete contact');
+      toast.error('Não foi possível eliminar o contacto');
     } else {
-      toast.success('Contact deleted');
+      toast.success('Contacto eliminado');
       fetchContacts();
     }
 
@@ -210,7 +210,7 @@ export default function ContactsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Contacts</h1>
+          <h1 className="text-2xl font-bold text-white">Contactos</h1>
           <p className="text-sm text-slate-400 mt-1">
             Manage your contact list. {totalCount > 0 && `${totalCount} total contacts.`}
           </p>
@@ -241,7 +241,7 @@ export default function ContactsPage() {
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
-            // Reset pagination when the query changes — the result
+            // Reset pagination when the query changes â€” the result
             // set shrinks/grows, page N may no longer be valid.
             setPage(0);
           }}
@@ -255,12 +255,12 @@ export default function ContactsPage() {
         <Table>
           <TableHeader>
             <TableRow className="border-slate-800 hover:bg-transparent">
-              <TableHead className="text-slate-400">Name</TableHead>
-              <TableHead className="text-slate-400">Phone</TableHead>
-              <TableHead className="text-slate-400 hidden md:table-cell">Email</TableHead>
-              <TableHead className="text-slate-400 hidden lg:table-cell">Company</TableHead>
-              <TableHead className="text-slate-400 hidden md:table-cell">Tags</TableHead>
-              <TableHead className="text-slate-400 hidden lg:table-cell">Created</TableHead>
+              <TableHead className="text-slate-400">Nome</TableHead>
+              <TableHead className="text-slate-400">Telefone</TableHead>
+              <TableHead className="text-slate-400 hidden md:table-cell">E-mail</TableHead>
+              <TableHead className="text-slate-400 hidden lg:table-cell">Empresa</TableHead>
+              <TableHead className="text-slate-400 hidden md:table-cell">Etiquetas</TableHead>
+              <TableHead className="text-slate-400 hidden lg:table-cell">Criado</TableHead>
               <TableHead className="text-slate-400 w-12" />
             </TableRow>
           </TableHeader>
@@ -270,7 +270,7 @@ export default function ContactsPage() {
                 <TableCell colSpan={7} className="text-center py-12">
                   <div className="flex flex-col items-center gap-2">
                     <Loader2 className="size-6 animate-spin text-violet-500" />
-                    <p className="text-sm text-slate-500">Loading contacts...</p>
+                    <p className="text-sm text-slate-500">A carregar contactos...</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -460,7 +460,7 @@ export default function ContactsPage() {
       <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <DialogContent className="bg-slate-900 border-slate-700 text-slate-200 sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-white">Delete Contact</DialogTitle>
+            <DialogTitle className="text-white">Eliminar contacto</DialogTitle>
             <DialogDescription className="text-slate-400">
               Are you sure you want to delete{' '}
               <span className="text-slate-200 font-medium">
@@ -491,3 +491,7 @@ export default function ContactsPage() {
     </div>
   );
 }
+
+
+
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -80,7 +80,7 @@ export function ContactSidebar({ contact }: ContactSidebarProps) {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     // Dep is the whole `contact` object (not `contact?.phone`) so the
-    // React Compiler's inference agrees with the manual dep list —
+    // React Compiler's inference agrees with the manual dep list â€”
     // fixes the `preserve-manual-memoization` lint error.
   }, [contact]);
 
@@ -114,7 +114,7 @@ export function ContactSidebar({ contact }: ContactSidebarProps) {
   if (!contact) {
     return (
       <div className="flex h-full w-70 items-center justify-center border-l border-slate-800 bg-slate-900">
-        <p className="text-sm text-slate-500">Select a conversation</p>
+        <p className="text-sm text-slate-500">Seleccione uma conversa</p>
       </div>
     );
   }
@@ -181,7 +181,7 @@ export function ContactSidebar({ contact }: ContactSidebarProps) {
             </div>
             <div className="mt-2 flex flex-wrap gap-1">
               {tags.length === 0 ? (
-                <p className="px-1 text-xs text-slate-600">No tags</p>
+                <p className="px-1 text-xs text-slate-600">Sem etiquetas</p>
               ) : (
                 tags.map((tag) => (
                   <span
@@ -210,7 +210,7 @@ export function ContactSidebar({ contact }: ContactSidebarProps) {
             </div>
             <div className="mt-2 space-y-2">
               {deals.length === 0 ? (
-                <p className="px-1 text-xs text-slate-600">No deals</p>
+                <p className="px-1 text-xs text-slate-600">Sem negócios</p>
               ) : (
                 deals.map((deal) => (
                   <div
@@ -293,3 +293,6 @@ export function ContactSidebar({ contact }: ContactSidebarProps) {
     </div>
   );
 }
+
+
+

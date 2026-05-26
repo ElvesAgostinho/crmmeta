@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
@@ -83,7 +83,7 @@ export function Step4ScheduleSend({
 
   const audienceLabel =
     audience.type === 'all'
-      ? 'All Contacts'
+      ? 'All Contactos'
       : audience.type === 'tags'
         ? `Tags (${audience.tagIds?.length ?? 0} selected)`
         : audience.type === 'csv'
@@ -99,9 +99,9 @@ export function Step4ScheduleSend({
         </p>
       </div>
 
-      {/* Broadcast Name */}
+      {/* Nome da campanha */}
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-white">Broadcast Name</label>
+        <label className="mb-1.5 block text-sm font-medium text-white">Nome da campanha</label>
         <Input
           value={name}
           onChange={(e) => onNameChange(e.target.value)}
@@ -115,7 +115,7 @@ export function Step4ScheduleSend({
         <p className="text-sm font-medium text-white">Summary</p>
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
-            <p className="text-xs text-slate-400">Template</p>
+            <p className="text-xs text-slate-400">Modelo</p>
             <p className="text-white">{template.name}</p>
           </div>
           <div>
@@ -136,8 +136,8 @@ export function Step4ScheduleSend({
             </div>
           </div>
           <div>
-            <p className="text-xs text-slate-400">Language</p>
-            <p className="text-white">{template.language ?? 'en_US'}</p>
+            <p className="text-xs text-slate-400">Idioma</p>
+            <p className="text-white">{template.language ?? 'pt_PT'}</p>
           </div>
         </div>
       </div>
@@ -199,7 +199,7 @@ export function Step4ScheduleSend({
           </DialogTrigger>
           <DialogContent className="border-slate-700 bg-slate-900 sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-white">Confirm Broadcast</DialogTitle>
+              <DialogTitle className="text-white">Confirmar campanha</DialogTitle>
               <DialogDescription className="text-slate-400">
                 You are about to send this broadcast to{' '}
                 <span className="font-medium text-white">{estimatedReach.toLocaleString()}</span>{' '}
@@ -234,3 +234,5 @@ export function Step4ScheduleSend({
     </div>
   );
 }
+
+

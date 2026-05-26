@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo } from "react";
 import type { Deal, PipelineStage } from "@/types";
@@ -33,8 +33,8 @@ function formatCurrency(value: number) {
 }
 
 /**
- * Weighted pipeline value: value × per-stage probability.
- * First stage ≈ 10%, stages interpolate up to 90% before the final stage,
+ * Weighted pipeline value: value x per-stage probability.
+ * First stage is about 10%, stages interpolate up to 90% before the final stage,
  * final stage (Won) = 100%. Lost deals excluded.
  */
 function computeStageProbability(
@@ -102,39 +102,39 @@ export function PipelineAnalytics({ stages, deals }: PipelineAnalyticsProps) {
       <div className="grid grid-cols-2 gap-3 rounded-xl border border-slate-800 bg-slate-900/60 p-4 sm:grid-cols-3 xl:grid-cols-6">
         <Metric
           icon={<BarChart3 className="h-4 w-4 text-slate-400" />}
-          label="Total Deals"
+          label="Total de negócios"
           value={String(stats.totalCount)}
-          tooltip="Count of every deal in this pipeline that isn't marked as Lost. Won deals are still included."
+          tooltip="Conta todos os negócios deste funil que não estejam marcados como perdidos. Os negócios ganhos continuam incluídos."
         />
         <Metric
           icon={<DollarSign className="h-4 w-4 text-violet-400" />}
-          label="Pipeline Value"
+          label="Valor do funil"
           value={formatCurrency(stats.totalValue)}
-          tooltip="Sum of the dollar values of all deals in this pipeline, excluding deals marked as Lost."
+          tooltip="Soma dos valores de todos os negócios deste funil, excluindo os marcados como perdidos."
         />
         <Metric
           icon={<Target className="h-4 w-4 text-blue-400" />}
-          label="Avg Deal Size"
+          label="Valor médio"
           value={formatCurrency(stats.avgValue)}
-          tooltip="Pipeline Value divided by Total Deals — the average value of a single non-lost deal."
+          tooltip="Valor do funil dividido pelo total de negócios. É o valor médio de um negócio não perdido."
         />
         <Metric
           icon={<TrendingUp className="h-4 w-4 text-purple-400" />}
-          label="Weighted Value"
+          label="Valor ponderado"
           value={formatCurrency(stats.weightedValue)}
-          tooltip="Expected revenue: each open deal's value × its stage probability. First stage ≈ 10%, stages progress up to 90%, Won = 100%. Lost deals are excluded."
+          tooltip="Receita esperada: valor de cada negócio aberto multiplicado pela probabilidade da etapa. A primeira etapa vale cerca de 10%, as seguintes avançam até 90% e ganho vale 100%."
         />
         <Metric
           icon={<Trophy className="h-4 w-4 text-violet-400" />}
-          label="Won This Month"
+          label="Ganhos este mês"
           value={String(stats.wonThisMonth)}
-          tooltip="Deals marked as Won since the first day of the current month."
+          tooltip="Negócios marcados como ganhos desde o primeiro dia do mês actual."
         />
         <Metric
           icon={<XCircle className="h-4 w-4 text-red-400" />}
-          label="Lost This Month"
+          label="Perdidos este mês"
           value={String(stats.lostThisMonth)}
-          tooltip="Deals marked as Lost since the first day of the current month."
+          tooltip="Negócios marcados como perdidos desde o primeiro dia do mês actual."
         />
       </div>
     </TooltipProvider>
@@ -162,7 +162,7 @@ function Metric({
             render={
               <button
                 type="button"
-                aria-label={`How ${label} is calculated`}
+                aria-label={`Como ${label} é calculado`}
                 className="ml-auto text-slate-500 hover:text-slate-300 focus:outline-none"
               />
             }
@@ -178,3 +178,4 @@ function Metric({
     </div>
   );
 }
+

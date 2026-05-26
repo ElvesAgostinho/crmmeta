@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { GitBranch } from 'lucide-react'
 import type { PipelineDonutData } from '@/lib/dashboard/types'
@@ -14,9 +14,9 @@ export function PipelineDonut({ data, loading }: PipelineDonutProps) {
   return (
     <section className="flex h-full flex-col rounded-xl border border-slate-800 bg-slate-900">
       <header className="border-b border-slate-800 px-5 py-4">
-        <h2 className="text-sm font-semibold text-white">Pipeline Value</h2>
+        <h2 className="text-sm font-semibold text-white">Valor do funil</h2>
         <p className="mt-0.5 text-xs text-slate-500">
-          Open deals by stage
+          Negócios abertos por etapa
         </p>
       </header>
 
@@ -26,8 +26,8 @@ export function PipelineDonut({ data, loading }: PipelineDonutProps) {
         ) : data.stages.length === 0 ? (
           <EmptyState
             icon={GitBranch}
-            title="No open deals yet"
-            hint="Create deals in Pipelines to see stage breakdowns here."
+            title="Ainda não existem negócios abertos"
+            hint="Crie negócios em Funis para ver aqui a distribuição por etapas."
           />
         ) : (
           <>
@@ -42,7 +42,7 @@ export function PipelineDonut({ data, loading }: PipelineDonutProps) {
                   />
                   <span className="flex-1 truncate text-slate-300">{s.name}</span>
                   <span className="text-slate-500 tabular-nums">
-                    {s.dealCount} deal{s.dealCount === 1 ? '' : 's'}
+                    {s.dealCount} negócio{s.dealCount === 1 ? '' : 's'}
                   </span>
                   <span className="w-20 text-right text-slate-300 tabular-nums">
                     {formatCurrencyShort(s.totalValue)}
@@ -58,8 +58,8 @@ export function PipelineDonut({ data, loading }: PipelineDonutProps) {
 }
 
 // ------------------------------------------------------------
-// SVG ring. 200×200 viewBox, 12px ring width. We draw one <path>
-// per stage using an SVG arc from startAngle → endAngle. Gaps
+// SVG ring. 200x200 viewBox, 12px ring width. We draw one <path>
+// per stage using an SVG arc from startAngle â†’ endAngle. Gaps
 // between segments are implied by a thin slate-900 stroke between
 // them for a cleaner look.
 // ------------------------------------------------------------
@@ -80,7 +80,7 @@ function Donut({ data }: { data: PipelineDonutData }) {
   const floorSum = floored.reduce((a, b) => a + b, 0)
   const shares = floored.map((x) => x / floorSum)
 
-  // Build a cumulative-offset array, then map stages → arc paths. Using
+  // Build a cumulative-offset array, then map stages â†’ arc paths. Using
   // a pre-computed offsets array avoids the Next 16 React Compiler's
   // "Cannot reassign variable after render completes" rule.
   const offsets: number[] = [0]
@@ -93,7 +93,7 @@ function Donut({ data }: { data: PipelineDonutData }) {
 
   return (
     <div className="flex items-center justify-center">
-      <svg viewBox={`0 0 ${size} ${size}`} className="h-48 w-48" role="img" aria-label="Pipeline value by stage">
+    <svg viewBox={`0 0 ${size} ${size}`} className="h-48 w-48" role="img" aria-label="Valor do funil por etapa">
         {/* background ring */}
         <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgb(30 41 59)" strokeWidth={ringWidth} />
         {segments.map((seg) => (
@@ -142,3 +142,4 @@ function formatCurrencyShort(v: number): string {
   if (v >= 1_000) return `$${(v / 1_000).toFixed(1)}k`
   return `$${v.toFixed(0)}`
 }
+

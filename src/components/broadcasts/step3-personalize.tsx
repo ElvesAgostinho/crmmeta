@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
@@ -30,16 +30,16 @@ interface Step3Props {
 }
 
 const contactFields = [
-  { value: 'name', label: 'Contact Name' },
+  { value: 'name', label: 'Nome do contacto' },
   { value: 'phone', label: 'Phone Number' },
   { value: 'email', label: 'Email Address' },
-  { value: 'company', label: 'Company' },
+  { value: 'company', label: 'Empresa' },
 ];
 
 const SAMPLE_CONTACT: Contact = {
   id: 'sample',
   user_id: '',
-  name: 'John Doe',
+  name: 'Jo?o Silva',
   phone: '+1234567890',
   email: 'john@example.com',
   company: 'Acme Corp',
@@ -114,7 +114,7 @@ export function Step3Personalize({
   /**
    * A placeholder is "unmapped" if the user hasn't picked either a
    * static value or a field/custom-field source. Blocks Next until
-   * every placeholder has something — otherwise the broadcast would
+   * every placeholder has something â€” otherwise the broadcast would
    * ship with empty strings and confuse recipients.
    */
   const unmappedKeys = useMemo(() => {
@@ -186,7 +186,7 @@ export function Step3Personalize({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-white">Personalize Message</h2>
+        <h2 className="text-lg font-semibold text-white">Personalizar mensagem</h2>
         <p className="mt-1 text-sm text-slate-400">
           Map template variables to contact fields, custom fields, or static
           values.
@@ -235,7 +235,7 @@ export function Step3Personalize({
                       </SelectTrigger>
                       <SelectContent className="border-slate-700 bg-slate-800">
                         <SelectItem value="static">Static Value</SelectItem>
-                        <SelectItem value="field">Contact Field</SelectItem>
+                        <SelectItem value="field">Campo do contacto</SelectItem>
                         <SelectItem value="custom_field">
                           Custom Field
                         </SelectItem>
@@ -264,7 +264,7 @@ export function Step3Personalize({
                         }
                       >
                         <SelectTrigger className="w-full border-slate-700 bg-slate-800 text-white">
-                          <SelectValue placeholder="Select field..." />
+                          <SelectValue placeholder="Seleccionar campo..." />
                         </SelectTrigger>
                         <SelectContent className="border-slate-700 bg-slate-800">
                           {contactFields.map((field) => (
@@ -285,10 +285,10 @@ export function Step3Personalize({
                           <SelectValue
                             placeholder={
                               loadingFields
-                                ? 'Loading…'
+                                ? 'Loadingâ€¦'
                                 : customFields.length === 0
                                   ? 'No custom fields'
-                                  : 'Select custom field…'
+                                  : 'Select custom fieldâ€¦'
                             }
                           />
                         </SelectTrigger>
@@ -309,7 +309,7 @@ export function Step3Personalize({
         </div>
       )}
 
-      {/* Live Preview — rendered as a WhatsApp-style bubble so the user
+      {/* Live Preview â€” rendered as a WhatsApp-style bubble so the user
           sees approximately what the recipient will see. */}
       <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
         <div className="mb-3 flex items-center gap-2">
@@ -331,7 +331,7 @@ export function Step3Personalize({
 
       {unmappedKeys.length > 0 && (
         <div className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
-          Map every placeholder before continuing — still missing{' '}
+          Map every placeholder before continuing â€” still missing{' '}
           <span className="font-mono font-semibold">
             {unmappedKeys.join(', ')}
           </span>
@@ -360,3 +360,5 @@ export function Step3Personalize({
     </div>
   );
 }
+
+

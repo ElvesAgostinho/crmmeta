@@ -136,7 +136,7 @@ export async function sendTemplateMessage(
     accessToken,
     to,
     templateName,
-    language = 'en_US',
+    language = 'pt_PT',
     params,
     contextMessageId,
   } = args

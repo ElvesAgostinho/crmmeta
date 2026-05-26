@@ -3,13 +3,13 @@ import { createClient } from '@/lib/supabase/server'
 import { decrypt } from '@/lib/whatsapp/encryption'
 
 /**
- * Sync message templates from Meta → local message_templates table.
+ * Sync message templates from Meta to the local message_templates table.
  *
  * Why this exists:
- *   The Settings → Message Templates UI only writes to Supabase. It does
+ *   The Settings > Templates de mensagem UI only writes to Supabase. It does
  *   NOT submit templates for approval to Meta. Users would create a
  *   template locally, try to broadcast with it, and hit Meta's error
- *   #132001 "Template name does not exist in the translation" — because
+ *   #132001 "Template name does not exist in the translation" - because
  *   Meta had never seen the template, or had it approved under a
  *   different language code than what we stored locally.
  *
@@ -19,13 +19,13 @@ import { decrypt } from '@/lib/whatsapp/encryption'
  *   something Meta will actually accept on send.
  *
  * Scope:
- *   - Read-only against Meta. We never push local → Meta (template
+ *   - Read-only against Meta. We never push local to Meta (template
  *     submission happens in Meta's WhatsApp Manager and requires human
  *     review).
  *   - Only approved templates are surfaced by default. We return
- *     everything Meta returns and let the UI filter — so the user can
+ *     everything Meta returns and let the UI filter - so the user can
  *     see their Pending / Rejected templates and understand why.
- *   - Locally-created templates (no Meta counterpart) are NOT deleted —
+ *   - Locally-created templates (no Meta counterpart) are NOT deleted -
  *     they remain visible so the user can notice drift and clean up
  *     manually.
  */
@@ -93,7 +93,7 @@ export async function POST() {
     } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Sessão não autorizada' }, { status: 401 })
     }
 
     // whatsapp_config holds waba_id + encrypted access_token.
@@ -107,7 +107,7 @@ export async function POST() {
       return NextResponse.json(
         {
           error:
-            'WhatsApp not configured. Connect your WhatsApp Business account in Settings first.',
+            'WhatsApp não configurado. Ligue primeiro a sua conta WhatsApp Business nas Definições.',
         },
         { status: 400 },
       )
@@ -117,7 +117,7 @@ export async function POST() {
       return NextResponse.json(
         {
           error:
-            'WABA (WhatsApp Business Account) ID missing. Re-connect your account in Settings.',
+            'Falta o ID da WABA (WhatsApp Business Account). Volte a ligar a conta nas Definições.',
         },
         { status: 400 },
       )
@@ -148,7 +148,7 @@ export async function POST() {
           const body = await metaRes.json()
           if (body?.error?.message) metaErr = body.error.message
         } catch {
-          // response wasn't JSON — keep the fallback
+          // response wasn't JSON - keep the fallback
         }
         return NextResponse.json({ error: metaErr }, { status: 502 })
       }
@@ -245,7 +245,7 @@ export async function POST() {
     return NextResponse.json(
       {
         error:
-          error instanceof Error ? error.message : 'Failed to sync templates',
+          error instanceof Error ? error.message : 'Não foi possível sincronizar os modelos',
       },
       { status: 500 },
     )

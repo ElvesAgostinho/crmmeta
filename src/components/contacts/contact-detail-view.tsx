@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
@@ -199,9 +199,9 @@ export function ContactDetailView({
       .eq('id', contactId);
 
     if (error) {
-      toast.error('Failed to update contact');
+      toast.error('Não foi possível actualizar o contacto');
     } else {
-      toast.success('Contact updated');
+      toast.success('Contacto actualizado');
       fetchContact();
       onUpdated();
     }
@@ -257,7 +257,7 @@ export function ContactDetailView({
     });
 
     if (error) {
-      toast.error('Failed to add note');
+      toast.error('Não foi possível adicionar a nota');
     } else {
       setNewNote('');
       fetchNotes();
@@ -273,7 +273,7 @@ export function ContactDetailView({
       .eq('id', noteId);
 
     if (error) {
-      toast.error('Failed to delete note');
+      toast.error('Não foi possível eliminar a nota');
     } else {
       setNotes((prev) => prev.filter((n) => n.id !== noteId));
       toast.success('Note deleted');
@@ -308,7 +308,7 @@ export function ContactDetailView({
 
       toast.success('Custom fields saved');
     } catch {
-      toast.error('Failed to save custom fields');
+      toast.error('Não foi possível guardar os campos personalizados');
     }
     setSavingCustom(false);
   }
@@ -419,7 +419,7 @@ export function ContactDetailView({
               <TabsContent value="details" className="flex-1 overflow-y-auto px-4 py-3">
                 <div className="space-y-3">
                   <div className="space-y-1.5">
-                    <Label className="text-slate-400 text-xs">Name</Label>
+                    <Label className="text-slate-400 text-xs">Nome</Label>
                     <Input
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
@@ -437,7 +437,7 @@ export function ContactDetailView({
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-slate-400 text-xs">Email</Label>
+                    <Label className="text-slate-400 text-xs">E-mail</Label>
                     <Input
                       value={editEmail}
                       onChange={(e) => setEditEmail(e.target.value)}
@@ -445,7 +445,7 @@ export function ContactDetailView({
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-slate-400 text-xs">Company</Label>
+                    <Label className="text-slate-400 text-xs">Empresa</Label>
                     <Input
                       value={editCompany}
                       onChange={(e) => setEditCompany(e.target.value)}
@@ -626,7 +626,7 @@ export function ContactDetailView({
                     <Loader2 className="size-5 animate-spin text-violet-500" />
                   </div>
                 ) : deals.length === 0 ? (
-                  <p className="text-xs text-slate-500">No deals yet</p>
+                  <p className="text-xs text-slate-500">Ainda sem negócios</p>
                 ) : (
                   <div className="space-y-2">
                     {deals.map((deal) => (
@@ -683,3 +683,8 @@ export function ContactDetailView({
     </Sheet>
   );
 }
+
+
+
+
+

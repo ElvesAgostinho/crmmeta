@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -44,7 +44,7 @@ import type {
 import { cn } from "@/lib/utils"
 
 // ------------------------------------------------------------
-// Types (builder-local — mirror the flattened rows we POST)
+// Types (builder-local - mirror the flattened rows we POST)
 // ------------------------------------------------------------
 
 export interface BuilderStep {
@@ -66,7 +66,7 @@ export interface BuilderInitial {
 }
 
 // ------------------------------------------------------------
-// Step metadata — one source of truth for icon + label + border color
+// Step metadata - one source of truth for icon + label + border color
 // ------------------------------------------------------------
 
 interface StepMeta {
@@ -77,17 +77,17 @@ interface StepMeta {
 }
 
 const STEP_META: Record<AutomationStepType, StepMeta> = {
-  send_message: { label: "Send Message", icon: MessageSquare, border: "border-l-violet-500" },
-  send_template: { label: "Send Template", icon: FileText, border: "border-l-violet-500" },
-  add_tag: { label: "Add Tag", icon: Tag, border: "border-l-violet-500" },
-  remove_tag: { label: "Remove Tag", icon: TagIcon, border: "border-l-violet-500" },
-  assign_conversation: { label: "Assign Conversation", icon: UserCheck, border: "border-l-violet-500" },
-  update_contact_field: { label: "Update Contact Field", icon: PencilLine, border: "border-l-violet-500" },
-  create_deal: { label: "Create Deal", icon: Briefcase, border: "border-l-violet-500" },
-  wait: { label: "Wait", icon: Hourglass, border: "border-l-slate-500" },
-  condition: { label: "Condition (If/Else)", icon: GitBranch, border: "border-l-amber-500" },
-  send_webhook: { label: "Send Webhook", icon: Webhook, border: "border-l-violet-500" },
-  close_conversation: { label: "Close Conversation", icon: CircleSlash, border: "border-l-violet-500" },
+  send_message: { label: "Enviar mensagem", icon: MessageSquare, border: "border-l-violet-500" },
+  send_template: { label: "Enviar modelo", icon: FileText, border: "border-l-violet-500" },
+  add_tag: { label: "Adicionar etiqueta", icon: Tag, border: "border-l-violet-500" },
+  remove_tag: { label: "Remover etiqueta", icon: TagIcon, border: "border-l-violet-500" },
+  assign_conversation: { label: "Atribuir conversa", icon: UserCheck, border: "border-l-violet-500" },
+  update_contact_field: { label: "Actualizar campo do contacto", icon: PencilLine, border: "border-l-violet-500" },
+  create_deal: { label: "Criar negócio", icon: Briefcase, border: "border-l-violet-500" },
+  wait: { label: "Esperar", icon: Hourglass, border: "border-l-slate-500" },
+  condition: { label: "Condição (Se/Senão)", icon: GitBranch, border: "border-l-amber-500" },
+  send_webhook: { label: "Enviar webhook", icon: Webhook, border: "border-l-violet-500" },
+  close_conversation: { label: "Fechar conversa", icon: CircleSlash, border: "border-l-violet-500" },
 }
 
 const ADDABLE_STEPS: AutomationStepType[] = [
@@ -105,17 +105,17 @@ const ADDABLE_STEPS: AutomationStepType[] = [
 ]
 
 const TRIGGER_OPTIONS: { value: AutomationTriggerType; label: string; hint: string }[] = [
-  { value: "new_message_received", label: "New Message Received", hint: "Any incoming message" },
+  { value: "new_message_received", label: "Nova mensagem recebida", hint: "Qualquer mensagem recebida" },
   {
     value: "first_inbound_message",
-    label: "First Message from Contact",
-    hint: "First time this contact ever messages you (works for manually-added contacts too)",
+    label: "Primeira mensagem do contacto",
+    hint: "Primeira vez que este contacto envia mensagem, incluindo contactos adicionados manualmente",
   },
-  { value: "keyword_match", label: "Keyword Match", hint: "Message contains specific keyword(s)" },
-  { value: "new_contact_created", label: "New Contact Created", hint: "When a contact is auto-created from an incoming message" },
-  { value: "conversation_assigned", label: "Conversation Assigned", hint: "When assigned to an agent" },
-  { value: "tag_added", label: "Tag Added", hint: "When a tag is added to a contact" },
-  { value: "time_based", label: "Time-Based", hint: "On a recurring schedule" },
+  { value: "keyword_match", label: "Correspondência de palavra-chave", hint: "A mensagem contém palavras-chave específicas" },
+  { value: "new_contact_created", label: "Novo contacto criado", hint: "Quando um contacto é criado automaticamente a partir de uma mensagem" },
+  { value: "conversation_assigned", label: "Conversa atribuída", hint: "Quando for atribuída a um agente" },
+  { value: "tag_added", label: "Etiqueta adicionada", hint: "Quando uma etiqueta é adicionada a um contacto" },
+  { value: "time_based", label: "Baseada no tempo", hint: "Num horário recorrente" },
 ]
 
 function cid(): string {
@@ -132,7 +132,7 @@ function blankConfig(type: AutomationStepType): Record<string, unknown> {
     case "send_message":
       return { text: "" }
     case "send_template":
-      return { template_name: "", language: "en_US" }
+      return { template_name: "", language: "pt_PT" }
     case "add_tag":
     case "remove_tag":
       return { tag_id: "" }
@@ -199,7 +199,7 @@ export function AutomationBuilder({ initial }: { initial: BuilderInitial }) {
     setSaving(true)
     try {
       const payload = {
-        name: state.name || "Untitled automation",
+        name: state.name || "Automação sem título",
         description: state.description || null,
         trigger_type: state.trigger_type,
         trigger_config: state.trigger_config,
@@ -210,11 +210,13 @@ export function AutomationBuilder({ initial }: { initial: BuilderInitial }) {
       const res = isEditing
         ? await fetch(`/api/automations/${initial.id}`, {
             method: "PATCH",
+            credentials: "include",
             headers: { "content-type": "application/json" },
             body: JSON.stringify(payload),
           })
         : await fetch(`/api/automations`, {
             method: "POST",
+            credentials: "include",
             headers: { "content-type": "application/json" },
             body: JSON.stringify(payload),
           })
@@ -231,11 +233,11 @@ export function AutomationBuilder({ initial }: { initial: BuilderInitial }) {
             description: firstIssue.path ? `at ${firstIssue.path}` : undefined,
           })
         } else {
-          toast.error(body?.error ?? "Save failed")
+          toast.error(body?.error ?? "Não foi possível guardar")
         }
         return
       }
-      toast.success(isEditing ? "Automation saved" : "Automation created")
+      toast.success(isEditing ? "Automação guardada" : "Automação criada")
       if (!isEditing && body?.automation?.id) {
         router.replace(`/automations/${body.automation.id}/edit`)
       }
@@ -246,7 +248,7 @@ export function AutomationBuilder({ initial }: { initial: BuilderInitial }) {
 
   return (
     <div className="fixed inset-0 flex flex-col bg-slate-950">
-      {/* Top bar. At sub-sm widths the "Active" label is hidden and the
+      {/* Top bar. At sub-sm widths the "Ativo" label is hidden and the
           switch moves to the right of the save button, so the name input
           gets maximum width. */}
       <header className="flex flex-shrink-0 items-center gap-2 border-b border-slate-800 bg-slate-900/80 px-3 py-3 sm:gap-3 sm:px-4">
@@ -254,22 +256,22 @@ export function AutomationBuilder({ initial }: { initial: BuilderInitial }) {
           type="button"
           onClick={() => router.push("/automations")}
           className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
-          aria-label="Back to automations"
+          aria-label="Voltar às automações"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
         <input
           value={state.name}
           onChange={(e) => patchTop("name", e.target.value)}
-          placeholder="Untitled automation"
+          placeholder="Automação sem título"
           className="min-w-0 flex-1 rounded-md bg-transparent px-2 py-1 text-sm font-semibold text-white placeholder:text-slate-500 focus:bg-slate-800 focus:outline-none sm:text-base"
         />
         <div className="flex items-center gap-2 text-xs text-slate-400">
-          <span className="hidden sm:inline">Active</span>
+          <span className="hidden sm:inline">Ativo</span>
           <Switch
             checked={state.is_active}
             onCheckedChange={(v) => patchTop("is_active", !!v)}
-            aria-label="Active"
+            aria-label="Ativo"
           />
         </div>
         <Button
@@ -278,7 +280,7 @@ export function AutomationBuilder({ initial }: { initial: BuilderInitial }) {
           className="bg-violet-600 text-white hover:bg-violet-700"
         >
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-          {isEditing ? "Save" : "Save Draft"}
+          {isEditing ? "Guardar" : "Guardar rascunho"}
         </Button>
       </header>
 
@@ -338,7 +340,7 @@ function TriggerCard({
             <Zap className="h-4 w-4" />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-[11px] uppercase tracking-wide text-blue-300">Trigger</div>
+            <div className="text-[11px] uppercase tracking-wide text-blue-300">Gatilho</div>
             <div className="truncate text-sm font-medium text-white">
               {TRIGGER_OPTIONS.find((o) => o.value === type)?.label ?? type}
             </div>
@@ -351,7 +353,7 @@ function TriggerCard({
           <div className="space-y-3 border-t border-slate-800 px-4 py-3">
             <div>
               <label className="mb-1 block text-xs font-medium text-slate-400">
-                Trigger type
+                Tipo de gatilho
               </label>
               <select
                 value={type}
@@ -376,7 +378,7 @@ function TriggerCard({
             )}
             {type === "tag_added" && (
               <Input
-                placeholder="Tag id"
+                placeholder="ID da etiqueta"
                 value={(config.tag_id as string) ?? ""}
                 onChange={(e) =>
                   onConfigChange({ ...config, tag_id: e.target.value })
@@ -386,7 +388,7 @@ function TriggerCard({
             )}
             {type === "time_based" && (
               <Input
-                placeholder="Cron expression or HH:mm"
+                placeholder="Expressão cron ou HH:mm"
                 value={(config.schedule as string) ?? ""}
                 onChange={(e) =>
                   onConfigChange({ ...config, schedule: e.target.value })
@@ -413,7 +415,7 @@ function KeywordMatchConfig({
     <div className="space-y-2">
       <div>
         <label className="mb-1 block text-xs font-medium text-slate-400">
-          Keywords (comma-separated)
+          Palavras-chave (separadas por vírgulas)
         </label>
         <Input
           value={keywords.join(", ")}
@@ -431,15 +433,15 @@ function KeywordMatchConfig({
       </div>
       <div>
         <label className="mb-1 block text-xs font-medium text-slate-400">
-          Match type
+          Tipo de correspondência
         </label>
         <select
           value={config?.match_type ?? "contains"}
           onChange={(e) => onChange({ ...config, match_type: e.target.value as "exact" | "contains" })}
           className="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1.5 text-sm text-white focus:outline-none"
         >
-          <option value="contains">Contains</option>
-          <option value="exact">Exact</option>
+          <option value="contains">Contém</option>
+          <option value="exact">Exacta</option>
         </select>
       </div>
     </div>
@@ -522,11 +524,11 @@ function StepRenderer({
   const meta = STEP_META[step.step_type]
   const Icon = meta.icon
   const expanded = props.expandedId === step.cid
-  const isCondition = step.step_type === "condition"
+  const isCondicao = step.step_type === "condition"
   // Card widths on mobile fill the full canvas column (max-w-2xl px-4
   // still keeps them reasonable). On sm+ the original fixed widths
   // come back so the flow visual stays recognisable.
-  const width = isCondition
+  const width = isCondicao
     ? "w-full max-w-[400px] sm:w-[400px]"
     : "w-full max-w-[320px] sm:w-80"
 
@@ -550,7 +552,7 @@ function StepRenderer({
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-[11px] uppercase tracking-wide text-slate-400">
-                {isCondition ? "Condition" : step.step_type === "wait" ? "Wait" : "Action"}
+                {isCondicao ? "Condição" : step.step_type === "wait" ? "Esperar" : "Ação"}
               </div>
               <div className="truncate text-sm font-medium text-white">{meta.label}</div>
               <div className="truncate text-[11px] text-slate-500">{previewFor(step)}</div>
@@ -571,7 +573,7 @@ function StepRenderer({
                     variant="ghost"
                     size="icon"
                     disabled={index === 0}
-                    aria-label="Move up"
+                    aria-label="Mover para cima"
                     onClick={() => props.moveStepAt(path, -1)}
                   >
                     <ArrowUp className="h-4 w-4" />
@@ -580,7 +582,7 @@ function StepRenderer({
                     variant="ghost"
                     size="icon"
                     disabled={index === total - 1}
-                    aria-label="Move down"
+                    aria-label="Mover para baixo"
                     onClick={() => props.moveStepAt(path, 1)}
                   >
                     <ArrowDown className="h-4 w-4" />
@@ -592,15 +594,15 @@ function StepRenderer({
                   onClick={() => props.deleteStepAt(path)}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
-                  Delete
+                  Eliminar
                 </Button>
               </div>
             </div>
           )}
         </div>
 
-        {isCondition && (
-          <ConditionBranches step={step} parentPath={path} {...props} />
+        {isCondicao && (
+          <CondicaoBranches step={step} parentPath={path} {...props} />
         )}
       </div>
 
@@ -611,7 +613,7 @@ function StepRenderer({
   )
 }
 
-function ConditionBranches({
+function CondicaoBranches({
   step,
   parentPath,
   ...props
@@ -623,7 +625,7 @@ function ConditionBranches({
   const no = step.branches?.no ?? []
   // Build the child scope by appending a branch marker. The scope the
   // StepList uses is driven by the LAST element of parentPath, so the
-  // tail's `index` doesn't matter — it's replaced per child during walks.
+  // tail's `index` doesn't matter - it's replaced per child during walks.
   const yesPath: StepPath = [
     ...parentPath,
     { kind: "branch", parentCid: step.cid, branch: "yes", index: 0 },
@@ -633,14 +635,14 @@ function ConditionBranches({
     { kind: "branch", parentCid: step.cid, branch: "no", index: 0 },
   ]
   return (
-    // Stack Yes/No vertically on mobile — two columns at 375px would
+    // Stack Sim/Nao vertically on mobile - two columns at 375px would
     // cram each branch to ~170px which is too narrow for the nested
     // cards. Two-column grid returns on sm+.
     <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-      <BranchColumn label="Yes" color="text-violet-400">
+      <BranchColumn label="Sim" color="text-violet-400">
         <StepList {...props} steps={yes} parentPath={yesPath} />
       </BranchColumn>
-      <BranchColumn label="No" color="text-rose-400">
+      <BranchColumn label="Nao" color="text-rose-400">
         <StepList {...props} steps={no} parentPath={noPath} />
       </BranchColumn>
     </div>
@@ -671,7 +673,7 @@ function AddButton({ onPick }: { onPick: (t: AutomationStepType) => void }) {
       <DropdownMenu>
         <DropdownMenuTrigger
           className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-dashed border-slate-700 bg-slate-950 text-slate-400 transition-colors hover:border-violet-500 hover:bg-violet-500/10 hover:text-violet-400 data-[popup-open]:border-violet-500 data-[popup-open]:bg-violet-500/20 data-[popup-open]:text-violet-400"
-          aria-label="Add step"
+          aria-label="Adicionar passo"
         >
           <Plus className="h-4 w-4" />
         </DropdownMenuTrigger>
@@ -713,130 +715,130 @@ function StepEditor({
   switch (step.step_type) {
     case "send_message":
       return (
-        <FieldBlock label="Message text">
+        <CampoBlock label="Texto da mensagem">
           <Textarea
             value={(cfg.text as string) ?? ""}
             onChange={(e) => set({ text: e.target.value })}
-            placeholder="Hi! Thanks for reaching out…"
+            placeholder="Ola! Obrigado pelo contacto..."
             className="min-h-24 bg-slate-800 text-white"
           />
-        </FieldBlock>
+        </CampoBlock>
       )
     case "send_template":
       return (
         <>
-          <FieldBlock label="Template name">
+          <CampoBlock label="Nome do modelo">
             <Input
               value={(cfg.template_name as string) ?? ""}
               onChange={(e) => set({ template_name: e.target.value })}
               className="bg-slate-800 text-white"
             />
-          </FieldBlock>
-          <FieldBlock label="Language">
+          </CampoBlock>
+          <CampoBlock label="Idioma">
             <Input
               value={(cfg.language as string) ?? ""}
               onChange={(e) => set({ language: e.target.value })}
               className="bg-slate-800 text-white"
             />
-          </FieldBlock>
+          </CampoBlock>
         </>
       )
     case "add_tag":
     case "remove_tag":
       return (
-        <FieldBlock label="Tag id">
+        <CampoBlock label="ID da etiqueta">
           <Input
             value={(cfg.tag_id as string) ?? ""}
             onChange={(e) => set({ tag_id: e.target.value })}
             className="bg-slate-800 text-white"
           />
-        </FieldBlock>
+        </CampoBlock>
       )
     case "assign_conversation":
       return (
         <>
-          <FieldBlock label="Mode">
+          <CampoBlock label="Modo">
             <select
               value={(cfg.mode as string) ?? "round_robin"}
               onChange={(e) => set({ mode: e.target.value })}
               className="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1.5 text-sm text-white"
             >
               <option value="round_robin">Round-robin</option>
-              <option value="specific">Specific agent</option>
+              <option value="specific">Agente especifico</option>
             </select>
-          </FieldBlock>
+          </CampoBlock>
           {cfg.mode === "specific" && (
-            <FieldBlock label="Agent id">
+            <CampoBlock label="ID do agente">
               <Input
                 value={(cfg.agent_id as string) ?? ""}
                 onChange={(e) => set({ agent_id: e.target.value })}
                 className="bg-slate-800 text-white"
               />
-            </FieldBlock>
+            </CampoBlock>
           )}
         </>
       )
     case "update_contact_field":
       return (
         <>
-          <FieldBlock label="Field">
+          <CampoBlock label="Campo">
             <select
               value={(cfg.field as string) ?? "name"}
               onChange={(e) => set({ field: e.target.value })}
               className="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1.5 text-sm text-white"
             >
-              <option value="name">Name</option>
-              <option value="email">Email</option>
-              <option value="company">Company</option>
+              <option value="name">Naome</option>
+              <option value="email">E-mail</option>
+              <option value="company">Empresa</option>
             </select>
-          </FieldBlock>
-          <FieldBlock label="Value">
+          </CampoBlock>
+          <CampoBlock label="Valor">
             <Input
               value={(cfg.value as string) ?? ""}
               onChange={(e) => set({ value: e.target.value })}
               className="bg-slate-800 text-white"
             />
-          </FieldBlock>
+          </CampoBlock>
         </>
       )
     case "create_deal":
       return (
         <>
-          <FieldBlock label="Pipeline id">
+          <CampoBlock label="ID do funil">
             <Input
               value={(cfg.pipeline_id as string) ?? ""}
               onChange={(e) => set({ pipeline_id: e.target.value })}
               className="bg-slate-800 text-white"
             />
-          </FieldBlock>
-          <FieldBlock label="Stage id">
+          </CampoBlock>
+          <CampoBlock label="ID da etapa">
             <Input
               value={(cfg.stage_id as string) ?? ""}
               onChange={(e) => set({ stage_id: e.target.value })}
               className="bg-slate-800 text-white"
             />
-          </FieldBlock>
-          <FieldBlock label="Title">
+          </CampoBlock>
+          <CampoBlock label="Titulo">
             <Input
               value={(cfg.title as string) ?? ""}
               onChange={(e) => set({ title: e.target.value })}
               className="bg-slate-800 text-white"
             />
-          </FieldBlock>
-          <FieldBlock label="Value">
+          </CampoBlock>
+          <CampoBlock label="Valor">
             <Input
               type="number"
               value={(cfg.value as number) ?? 0}
               onChange={(e) => set({ value: Number(e.target.value) })}
               className="bg-slate-800 text-white"
             />
-          </FieldBlock>
+          </CampoBlock>
         </>
       )
     case "wait":
       return (
         <div className="grid grid-cols-2 gap-2">
-          <FieldBlock label="Amount">
+          <CampoBlock label="Valor">
             <Input
               type="number"
               min={1}
@@ -844,36 +846,36 @@ function StepEditor({
               onChange={(e) => set({ amount: Math.max(1, Number(e.target.value)) })}
               className="bg-slate-800 text-white"
             />
-          </FieldBlock>
-          <FieldBlock label="Unit">
+          </CampoBlock>
+          <CampoBlock label="Unidade">
             <select
               value={(cfg.unit as string) ?? "hours"}
               onChange={(e) => set({ unit: e.target.value })}
               className="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1.5 text-sm text-white"
             >
-              <option value="minutes">Minutes</option>
-              <option value="hours">Hours</option>
-              <option value="days">Days</option>
+              <option value="minutes">Minutos</option>
+              <option value="hours">Horas</option>
+              <option value="days">Dias</option>
             </select>
-          </FieldBlock>
+          </CampoBlock>
         </div>
       )
     case "condition":
       return (
         <>
-          <FieldBlock label="Subject">
+          <CampoBlock label="Assunto">
             <select
               value={(cfg.subject as string) ?? "tag_presence"}
               onChange={(e) => set({ subject: e.target.value })}
               className="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1.5 text-sm text-white"
             >
-              <option value="tag_presence">Tag presence</option>
-              <option value="contact_field">Contact field</option>
-              <option value="message_content">Message content</option>
-              <option value="time_of_day">Time of day</option>
+              <option value="tag_presence">Presenca de etiqueta</option>
+              <option value="contact_field">Campo do contacto</option>
+              <option value="message_content">Conteudo da mensagem</option>
+              <option value="time_of_day">Hora do dia</option>
             </select>
-          </FieldBlock>
-          <FieldBlock label="Operand">
+          </CampoBlock>
+          <CampoBlock label="Operando">
             <Input
               placeholder={
                 cfg.subject === "time_of_day"
@@ -888,41 +890,41 @@ function StepEditor({
               onChange={(e) => set({ operand: e.target.value })}
               className="bg-slate-800 text-white"
             />
-          </FieldBlock>
+          </CampoBlock>
           {(cfg.subject === "contact_field" || cfg.subject === "message_content") && (
-            <FieldBlock label="Value">
+            <CampoBlock label="Valor">
               <Input
                 value={(cfg.value as string) ?? ""}
                 onChange={(e) => set({ value: e.target.value })}
                 className="bg-slate-800 text-white"
               />
-            </FieldBlock>
+            </CampoBlock>
           )}
         </>
       )
     case "send_webhook":
       return (
         <>
-          <FieldBlock label="URL">
+          <CampoBlock label="URL">
             <Input
               value={(cfg.url as string) ?? ""}
               onChange={(e) => set({ url: e.target.value })}
               className="bg-slate-800 text-white"
             />
-          </FieldBlock>
-          <FieldBlock label="Body template (JSON)">
+          </CampoBlock>
+          <CampoBlock label="Modelo do corpo (JSON)">
             <Textarea
               value={(cfg.body_template as string) ?? ""}
               onChange={(e) => set({ body_template: e.target.value })}
               className="min-h-20 bg-slate-800 font-mono text-xs text-white"
             />
-          </FieldBlock>
+          </CampoBlock>
         </>
       )
     case "close_conversation":
       return (
         <p className="text-xs text-slate-400">
-          Sets the conversation status to &quot;closed&quot;. No configuration needed.
+          Define o estado da conversa como &quot;fechada&quot;. Não é necessária configuração.
         </p>
       )
     default:
@@ -930,7 +932,7 @@ function StepEditor({
   }
 }
 
-function FieldBlock({
+function CampoBlock({
   label,
   children,
 }: {
@@ -948,15 +950,15 @@ function FieldBlock({
 function previewFor(step: BuilderStep): string {
   switch (step.step_type) {
     case "send_message":
-      return (step.step_config.text as string) || "no text yet"
+      return (step.step_config.text as string) || "ainda sem texto"
     case "send_template":
-      return (step.step_config.template_name as string) || "pick a template"
+      return (step.step_config.template_name as string) || "escolha um modelo"
     case "wait":
       return `${step.step_config.amount ?? "?"} ${step.step_config.unit ?? ""}`
     case "condition":
-      return `when ${step.step_config.subject ?? "?"}`
+      return `quando ${step.step_config.subject ?? "?"}`
     case "send_webhook":
-      return (step.step_config.url as string) || "no url"
+      return (step.step_config.url as string) || "sem url"
     default:
       return ""
   }
@@ -1130,7 +1132,7 @@ function moveInBranches(
 }
 
 // ------------------------------------------------------------
-// Serialize builder tree → API payload (flattened shape)
+// Serialize builder tree -> API payload (flattened shape)
 // ------------------------------------------------------------
 
 interface ApiStep {
@@ -1174,3 +1176,8 @@ export function fromServerSteps(nodes: ServerStepNode[]): BuilderStep[] {
         : undefined,
   }))
 }
+
+
+
+
+

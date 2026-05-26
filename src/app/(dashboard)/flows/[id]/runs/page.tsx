@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -27,7 +27,7 @@ import { cn } from "@/lib/utils";
  *
  * Lists the 50 most recent runs for a flow, newest first. Each row
  * collapses to a one-liner (contact + status + time); expanding shows
- * the full `flow_run_events` timeline for that run — useful for
+ * the full `flow_run_events` timeline for that run â€” useful for
  * debugging "why didn't my flow advance?" by surfacing the engine's
  * own log.
  */
@@ -64,7 +64,7 @@ const STATUS_META: Record<
   { label: string; classes: string; icon: typeof Clock }
 > = {
   active: {
-    label: "Active",
+    label: "Activo",
     classes: "border-emerald-600/40 bg-emerald-500/10 text-emerald-300",
     icon: PlayCircle,
   },
@@ -89,7 +89,7 @@ const STATUS_META: Record<
     icon: PauseCircle,
   },
   failed: {
-    label: "Failed",
+    label: "Falhou",
     classes: "border-red-600/40 bg-red-500/10 text-red-300",
     icon: CircleAlert,
   },
@@ -119,7 +119,7 @@ export default function FlowRunsPage() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`/api/flows/${params.id}/runs`);
+        const res = await fetch(`/api/flows/${params.id}/runs`, { credentials: "include" });
         if (res.status === 404) {
           if (!cancelled) setNotFound(true);
           return;
@@ -168,13 +168,13 @@ export default function FlowRunsPage() {
   if (notFound || !flow) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3">
-        <p className="text-sm text-slate-400">Flow not found.</p>
+        <p className="text-sm text-slate-400">Fluxo não encontrado.</p>
         <button
           type="button"
           onClick={() => router.push("/flows")}
           className="text-sm text-violet-400 hover:text-violet-300"
         >
-          ← Back to flows
+          â† Back to flows
         </button>
       </div>
     );
@@ -232,7 +232,7 @@ function RunCard({
   const meta = STATUS_META[run.status];
   const StatusIcon = meta.icon;
   const contactLabel =
-    run.contact?.name?.trim() || run.contact?.phone || "Unknown contact";
+    run.contact?.name?.trim() || run.contact?.phone || "Contacto desconhecido";
   const duration = run.ended_at
     ? formatDistanceToNow(new Date(run.ended_at), {
         addSuffix: false,
@@ -268,9 +268,9 @@ function RunCard({
           <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
             <span>Started {format(new Date(run.started_at), "PP p")}</span>
             {run.reprompt_count > 0 && (
-              <span>· {run.reprompt_count} re-prompts</span>
+              <span>· {run.reprompt_count} repetições</span>
             )}
-            {duration && <span>· ran for {duration}</span>}
+            {duration && <span>· durou {duration}</span>}
           </div>
         </div>
       </button>
@@ -348,3 +348,5 @@ function summarizePayload(payload: Record<string, unknown>): string {
   }
   return "";
 }
+
+

@@ -25,7 +25,7 @@ export default function EditAutomationPage({
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const res = await fetch(`/api/automations/${id}`)
+    const res = await fetch(`/api/automations/${id}`, { credentials: "include" })
       if (!res.ok) {
         if (!cancelled) setError(`Failed to load (${res.status})`)
         return
@@ -56,7 +56,7 @@ export default function EditAutomationPage({
           onClick={() => router.push("/automations")}
           className="text-sm text-violet-400 hover:text-violet-300"
         >
-          Back to Automations
+          Voltar às automações
         </button>
       </div>
     )

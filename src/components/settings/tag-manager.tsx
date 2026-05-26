@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -68,7 +68,7 @@ export function TagManager() {
       setTags(data || []);
     } catch (err) {
       console.error('Failed to fetch tags:', err);
-      toast.error('Failed to load tags');
+      toast.error('Não foi possível carregar as etiquetas');
     } finally {
       setLoading(false);
     }
@@ -104,7 +104,7 @@ export function TagManager() {
       if (user) await fetchTags(user.id);
     } catch (err) {
       console.error('Create error:', err);
-      toast.error('Failed to create tag');
+      toast.error('Não foi possível criar a etiqueta');
     } finally {
       setSaving(false);
     }
@@ -133,7 +133,7 @@ export function TagManager() {
       setTagToDelete(null);
     } catch (err) {
       console.error('Delete error:', err);
-      toast.error('Failed to delete tag');
+      toast.error('Não foi possível eliminar a etiqueta');
     } finally {
       setDeleting(false);
     }
@@ -151,7 +151,7 @@ export function TagManager() {
     <div className="space-y-4 mt-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-white">Tags</h2>
+          <h2 className="text-lg font-semibold text-white">Etiquetas</h2>
           <p className="text-sm text-slate-400">Organize your contacts with color-coded tags.</p>
         </div>
         <Button
@@ -163,15 +163,15 @@ export function TagManager() {
           className="bg-violet-600 hover:bg-violet-700 text-white"
         >
           <Plus className="size-4" />
-          New Tag
+          Nova etiqueta
         </Button>
       </div>
 
       {tags.length === 0 ? (
         <Card className="bg-slate-900 border-slate-700 ring-0 ring-transparent">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <p className="text-slate-400 text-sm">No tags yet.</p>
-            <p className="text-slate-500 text-xs mt-1">Create tags to categorize your contacts.</p>
+            <p className="text-slate-400 text-sm">Ainda não existem etiquetas.</p>
+            <p className="text-slate-500 text-xs mt-1">Crie etiquetas para categorizar os contactos.</p>
           </CardContent>
         </Card>
       ) : (
@@ -206,11 +206,11 @@ export function TagManager() {
         </Card>
       )}
 
-      {/* New Tag Dialog */}
+      {/* Nova etiqueta Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="bg-slate-900 border-slate-700 sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-white">New Tag</DialogTitle>
+            <DialogTitle className="text-white">Nova etiqueta</DialogTitle>
             <DialogDescription className="text-slate-400">
               Create a new tag with a name and color.
             </DialogDescription>
@@ -286,7 +286,7 @@ export function TagManager() {
               {saving ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
-                  Creating...
+                  A criar...
                 </>
               ) : (
                 'Create Tag'
@@ -300,7 +300,7 @@ export function TagManager() {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent className="bg-slate-900 border-slate-700 sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-white">Delete Tag</DialogTitle>
+            <DialogTitle className="text-white">Eliminar etiqueta</DialogTitle>
             <DialogDescription className="text-slate-400">
               Are you sure you want to delete the tag &quot;{tagToDelete?.name}&quot;? This will remove
               it from all contacts. This action cannot be undone.
@@ -325,7 +325,7 @@ export function TagManager() {
                   Deleting...
                 </>
               ) : (
-                'Delete Tag'
+                'Eliminar etiqueta'
               )}
             </Button>
           </DialogFooter>
@@ -334,3 +334,11 @@ export function TagManager() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
