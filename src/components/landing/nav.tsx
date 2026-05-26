@@ -92,14 +92,32 @@ export function LandingNav({ onRequestAccess }: LandingNavProps = {}) {
           <NavCtas auth={auth} onRequestAccess={onRequestAccess} />
         </div>
 
-        <button
-          type="button"
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-300 transition-colors hover:bg-slate-800 hover:text-white md:hidden"
-          aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
-          onClick={() => setMobileOpen((v) => !v)}
-        >
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <div className="flex items-center gap-2 md:hidden">
+          {auth === 'signed-in' ? (
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center justify-center rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-violet-500"
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:border-slate-600 hover:text-white"
+            >
+              Entrar
+            </Link>
+          )}
+
+          <button
+            type="button"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-300 transition-colors hover:bg-slate-800 hover:text-white"
+            aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
+            onClick={() => setMobileOpen((v) => !v)}
+          >
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
 
       {mobileOpen && (
