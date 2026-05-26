@@ -17,10 +17,15 @@ type AuthState = 'signed-in' | 'signed-out'
 const LINKS = [
   { href: '#features', label: 'Funcionalidades' },
   { href: '#how-it-works', label: 'Como funciona' },
+  { href: '#pricing', label: 'Preços' },
   { href: '#faq', label: 'FAQ' },
 ]
 
-export function LandingNav() {
+interface LandingNavProps {
+  onRequestAccess?: () => void
+}
+
+export function LandingNav({ onRequestAccess }: LandingNavProps = {}) {
   // Default to 'signed-out' so Sign in / Get started buttons are always
   // visible immediately. Supabase resolves asynchronously and flips to
   // 'signed-in' if there is an active session — no layout shift.
@@ -84,7 +89,7 @@ export function LandingNav() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
-          <NavCtas auth={auth} />
+          <NavCtas auth={auth} onRequestAccess={onRequestAccess} />
         </div>
 
         <button
@@ -111,7 +116,7 @@ export function LandingNav() {
               </Link>
             ))}
             <div className="mt-2 flex flex-col gap-2 border-t border-slate-800 pt-3">
-              <NavCtas auth={auth} mobile />
+              <NavCtas auth={auth} mobile onRequestAccess={onRequestAccess} />
             </div>
           </div>
         </div>
@@ -120,7 +125,15 @@ export function LandingNav() {
   )
 }
 
-function NavCtas({ auth, mobile = false }: { auth: AuthState; mobile?: boolean }) {
+function NavCtas({
+  auth,
+  mobile = false,
+  onRequestAccess,
+}: {
+  auth: AuthState
+  mobile?: boolean
+  onRequestAccess?: () => void
+}) {
   const btnBase =
     'inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors'
   const secondary = cn(
@@ -142,12 +155,19 @@ function NavCtas({ auth, mobile = false }: { auth: AuthState; mobile?: boolean }
     )
   }
 
+  const handleComeca = (e: React.MouseEvent) => {
+    if (onRequestAccess) {
+      e.preventDefault()
+      onRequestAccess()
+    }
+  }
+
   return (
     <>
       <Link href="/login" className={secondary}>
         Entrar
       </Link>
-      <Link href="/signup" className={primary}>
+      <Link href="/signup" className={primary} onClick={handleComeca}>
         Começar
       </Link>
     </>

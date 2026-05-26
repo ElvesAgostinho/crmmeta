@@ -1,0 +1,102 @@
+{
+  "name": "Access Request Notification",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "access-request-notification",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "webhook-trigger",
+      "name": "Supabase Webhook Trigger"
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "name",
+              "value": "={{ $json.record.name }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ $json.record.email }}"
+            },
+            {
+              "name": "company",
+              "value": "={{ $json.record.company || 'Não especificado' }}"
+            },
+            {
+              "name": "plan",
+              "value": "={{ $json.record.plan }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.record.message || 'Sem mensagem' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        220,
+        0
+      ],
+      "id": "format-data",
+      "name": "Format Data"
+    },
+    {
+      "parameters": {
+        "fromEmail": "orgabot57@gmail.com",
+        "toEmail": "orgabot57@gmail.com",
+        "subject": "Novo Pedido de Acesso no CRM (Plano: {{ $json.plan }})",
+        "html": "<div style=\"font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; rounded-lg\">\n  <h2 style=\"color: #7c3aed; margin-bottom: 20px;\">Novo Pedido de Acesso</h2>\n  <table style=\"width: 100%; border-collapse: collapse;\">\n    <tr>\n      <td style=\"padding: 8px 0; border-b: 1px solid #f1f5f9; font-weight: bold;\">Nome:</td>\n      <td style=\"padding: 8px 0; border-b: 1px solid #f1f5f9;\">{{ $json.name }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding: 8px 0; border-b: 1px solid #f1f5f9; font-weight: bold;\">Email:</td>\n      <td style=\"padding: 8px 0; border-b: 1px solid #f1f5f9;\"><a href=\"mailto:{{ $json.email }}\">{{ $json.email }}</a></td>\n    </tr>\n    <tr>\n      <td style=\"padding: 8px 0; border-b: 1px solid #f1f5f9; font-weight: bold;\">Empresa:</td>\n      <td style=\"padding: 8px 0; border-b: 1px solid #f1f5f9;\">{{ $json.company }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding: 8px 0; border-b: 1px solid #f1f5f9; font-weight: bold;\">Plano Escolhido:</td>\n      <td style=\"padding: 8px 0; border-b: 1px solid #f1f5f9;\"><span style=\"background-color: #f5f3ff; color: #7c3aed; padding: 2px 8px; border-radius: 4px; font-weight: bold;\">{{ $json.plan }}</span></td>\n    </tr>\n    <tr>\n      <td style=\"padding: 8px 0; border-b: 1px solid #f1f5f9; font-weight: bold; vertical-align: top;\">Mensagem:</td>\n      <td style=\"padding: 8px 0; border-b: 1px solid #f1f5f9;\">{{ $json.message }}</td>\n    </tr>\n  </table>\n  <div style=\"margin-top: 30px; text-align: center;\">\n    <a href=\"https://crmmeta.orgabot57.dev/superadmin\" style=\"background-color: #7c3aed; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;\">Ir para o Painel de Superadmin</a>\n  </div>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.email",
+      "typeVersion": 1,
+      "position": [
+        440,
+        0
+      ],
+      "id": "send-email",
+      "name": "Send Email Notification"
+    }
+  ],
+  "connections": {
+    "Supabase Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Format Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Data": {
+      "main": [
+        [
+          {
+            "node": "Send Email Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "id": "access-request-n8n-workflow"
+}

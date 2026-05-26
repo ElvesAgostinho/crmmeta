@@ -1,5 +1,6 @@
-import type { Metadata } from 'next'
+'use client'
 
+import { useState } from 'react'
 import { LandingNav } from '@/components/landing/nav'
 import { Hero } from '@/components/landing/hero'
 import { FeaturesGrid } from '@/components/landing/features-grid'
@@ -12,25 +13,22 @@ import { InboxMock } from '@/components/landing/mock/inbox-mock'
 import { PipelineMock } from '@/components/landing/mock/pipeline-mock'
 import { AutomationMock } from '@/components/landing/mock/automation-mock'
 import { AnalyticsMock } from '@/components/landing/mock/analytics-mock'
-import { JsonLd } from '@/components/seo/json-ld'
-import { landingPageLd } from '@/lib/seo/structured-data'
-import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE } from '@/lib/seo/site-config'
-
-export const metadata: Metadata = {
-  title: {
-    absolute: `${SITE_NAME} — ${SITE_TAGLINE}`,
-  },
-  description: SITE_DESCRIPTION,
-  alternates: {
-    canonical: '/',
-  },
-}
+import { Pricing } from '@/components/landing/pricing'
+import { RequestAccessModal } from '@/components/landing/request-access-modal'
+import { SupportWidget } from '@/components/landing/support-widget'
 
 export default function LandingPage() {
+  const [modalOpen, setModalOpen] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState<'basic' | 'medium'>('basic')
+
+  const handleRequestPlan = (plan: 'basic' | 'medium') => {
+    setSelectedPlan(plan)
+    setModalOpen(true)
+  }
+
   return (
     <div className="bg-slate-950 text-slate-100">
-      <JsonLd data={landingPageLd()} />
-      <LandingNav />
+      <LandingNav onRequestAccess={() => setModalOpen(true)} />
       <main>
         <Hero />
 
@@ -97,9 +95,20 @@ export default function LandingPage() {
         />
 
         <FAQ />
+
+        <Pricing onRequestPlan={handleRequestPlan} />
+
         <CtaBanner />
       </main>
       <Footer />
+
+      <RequestAccessModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        defaultPlan={selectedPlan}
+      />
+
+      <SupportWidget />
     </div>
   )
 }

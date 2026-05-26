@@ -20,6 +20,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { createClient } from '@/lib/supabase/client'
 
 const APP_ID = process.env.NEXT_PUBLIC_META_APP_ID!
 
@@ -67,6 +68,61 @@ export function WhatsAppEmbeddedSignup({ onSuccess, isConnected = false }: Props
   const [sdkReady, setSdkReady] = useState(false)
   const [connecting, setConnecting] = useState(false)
   const [justConnected, setJustConnected] = useState(false)
+  const [globalEnabled, setGlobalEnabled] = useState<boolean | null>(null)
+  const [moduleEnabled, setModuleEnabled] = useState<boolean | null>(null)
+  const [loadingStatus, setLoadingStatus] = useState(true)
+
+  // Fetch settings and modules
+  useEffect(() => {
+    let cancelled = false
+    async function checkStatus() {
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user || cancelled) return
+
+        // 1. Fetch global app setting
+        const { data: globalSetting } = await supabase
+          .from('app_settings')
+          .select('value')
+          .eq('key', 'embedded_signup_enabled')
+          .single()
+
+        const globalVal = globalSetting ? !!globalSetting.value : false
+        if (!cancelled) setGlobalEnabled(globalVal)
+
+        // 2. Superadmin bypasses user-specific restriction
+        if (user.email === 'elvessacapuri57@gmail.com') {
+          if (!cancelled) {
+            setModuleEnabled(true)
+            setLoadingStatus(false)
+          }
+          return
+        }
+
+        // 3. Fetch user subscription module key
+        const { data: subscription } = await supabase
+          .from('subscriptions')
+          .select('modules_enabled')
+          .eq('user_id', user.id)
+          .single()
+
+        const modules = subscription?.modules_enabled as any
+        const moduleVal = modules ? !!modules.embedded_signup : false
+
+        if (!cancelled) {
+          setModuleEnabled(moduleVal)
+          setLoadingStatus(false)
+        }
+      } catch (err) {
+        console.error('Error checking embedded signup status:', err)
+        if (!cancelled) setLoadingStatus(false)
+      }
+    }
+
+    checkStatus()
+    return () => { cancelled = true }
+  }, [])
 
   // Load the Facebook JS SDK once on mount.
   useEffect(() => {
@@ -214,87 +270,122 @@ export function WhatsAppEmbeddedSignup({ onSuccess, isConnected = false }: Props
       </CardHeader>
 
       <CardContent className="space-y-5">
-        {/* Benefits row */}
-        {!justConnected && (
-          <div className="flex flex-wrap gap-4">
-            {[
-              { icon: Shield, label: 'Seguro e oficial Meta' },
-              { icon: Clock, label: 'Menos de 2 minutos' },
-              { icon: Smartphone, label: 'Qualquer número verificado' },
-            ].map(({ icon: Icon, label }) => (
-              <span
-                key={label}
-                className="flex items-center gap-1.5 text-xs text-slate-400"
-              >
-                <Icon className="h-3.5 w-3.5 text-violet-400" />
-                {label}
-              </span>
-            ))}
+        {loadingStatus ? (
+          <div className="flex items-center justify-center py-6">
+            <Loader2 className="h-6 w-6 animate-spin text-violet-400" />
+            <span className="ml-2 text-xs text-slate-400">A verificar permissões...</span>
           </div>
-        )}
-
-        {/* Success state */}
-        {justConnected ? (
-          <div className="flex items-center gap-3 rounded-xl bg-green-950/40 border border-green-700/30 px-4 py-3">
-            <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
-            <p className="text-sm text-green-300 font-medium">
-              WhatsApp ligado! A página de configuração foi atualizada.
-            </p>
+        ) : globalEnabled === false ? (
+          <div className="rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-4 text-sm text-red-200">
+            <div className="flex items-start gap-3">
+              <span className="text-lg">⚠️</span>
+              <div>
+                <p className="font-semibold">Embedded Signup desativado</p>
+                <p className="text-xs text-red-300/80 mt-1">
+                  A ligação por 1-clique (Embedded Signup) está temporariamente desativada pelo administrador.
+                  Por favor, utiliza a configuração manual abaixo ou contacta o suporte.
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : moduleEnabled === false ? (
+          <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-4 text-sm text-amber-200">
+            <div className="flex items-start gap-3">
+              <span className="text-lg">🔒</span>
+              <div>
+                <p className="font-semibold">Módulo não disponível</p>
+                <p className="text-xs text-amber-300/80 mt-1">
+                  O teu plano atual não inclui a ligação automática por 1-clique.
+                  Por favor, faz a configuração manual dos dados abaixo ou faz o upgrade da tua subscrição.
+                </p>
+              </div>
+            </div>
           </div>
         ) : (
-          <div className="space-y-3">
-            {/* How it works */}
-            <div className="flex flex-col gap-2 rounded-xl bg-slate-800/50 border border-slate-700/50 px-4 py-3">
-              <p className="text-xs font-medium text-slate-300 mb-1">Como funciona:</p>
-              {[
-                'Clica no botão abaixo',
-                'Um popup da Meta abre — faz login e autoriza',
-                'O número fica ligado automaticamente',
-              ].map((step, i) => (
-                <div key={i} className="flex items-center gap-2 text-xs text-slate-400">
-                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-violet-600/60 text-white font-bold text-[10px]">
-                    {i + 1}
+          <>
+            {/* Benefits row */}
+            {!justConnected && (
+              <div className="flex flex-wrap gap-4">
+                {[
+                  { icon: Shield, label: 'Seguro e oficial Meta' },
+                  { icon: Clock, label: 'Menos de 2 minutos' },
+                  { icon: Smartphone, label: 'Qualquer número verificado' },
+                ].map(({ icon: Icon, label }) => (
+                  <span
+                    key={label}
+                    className="flex items-center gap-1.5 text-xs text-slate-400"
+                  >
+                    <Icon className="h-3.5 w-3.5 text-violet-400" />
+                    {label}
                   </span>
-                  {step}
-                </div>
-              ))}
-            </div>
-
-            {/* CTA Button */}
-            <Button
-              id="whatsapp-embedded-signup-btn"
-              onClick={(e) => {
-                e.preventDefault()
-                handleConnect()
-              }}
-              disabled={connecting || !sdkReady}
-              className="w-full h-11 bg-gradient-to-r from-[#25D366] to-[#1aad52] hover:from-[#1ebe5d] hover:to-[#159a48] text-white font-semibold text-sm shadow-lg shadow-green-900/30 transition-all duration-200 gap-2"
-            >
-              {connecting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  {buttonLabel}
-                </>
-              ) : justConnected ? (
-                <>
-                  <CheckCircle2 className="h-4 w-4" />
-                  {buttonLabel}
-                </>
-              ) : (
-                <>
-                  <Zap className="h-4 w-4" />
-                  {buttonLabel}
-                  <ArrowRight className="h-4 w-4 ml-auto" />
-                </>
-              )}
-            </Button>
-
-            {!sdkReady && (
-              <p className="text-center text-xs text-slate-500">
-                A carregar SDK da Meta…
-              </p>
+                ))}
+              </div>
             )}
-          </div>
+
+            {/* Success state */}
+            {justConnected ? (
+              <div className="flex items-center gap-3 rounded-xl bg-green-950/40 border border-green-700/30 px-4 py-3">
+                <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
+                <p className="text-sm text-green-300 font-medium">
+                  WhatsApp ligado! A página de configuração foi atualizada.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {/* How it works */}
+                <div className="flex flex-col gap-2 rounded-xl bg-slate-800/50 border border-slate-700/50 px-4 py-3">
+                  <p className="text-xs font-medium text-slate-300 mb-1">Como funciona:</p>
+                  {[
+                    'Clica no botão abaixo',
+                    'Um popup da Meta abre — faz login e autoriza',
+                    'O número fica ligado automaticamente',
+                  ].map((step, i) => (
+                    <div key={i} className="flex items-center gap-2 text-xs text-slate-400">
+                      <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-violet-600/60 text-white font-bold text-[10px]">
+                        {i + 1}
+                      </span>
+                      {step}
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTA Button */}
+                <Button
+                  id="whatsapp-embedded-signup-btn"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    handleConnect()
+                  }}
+                  disabled={connecting || !sdkReady}
+                  className="w-full h-11 bg-gradient-to-r from-[#25D366] to-[#1aad52] hover:from-[#1ebe5d] hover:to-[#159a48] text-white font-semibold text-sm shadow-lg shadow-green-900/30 transition-all duration-200 gap-2"
+                >
+                  {connecting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {buttonLabel}
+                    </>
+                  ) : justConnected ? (
+                    <>
+                      <CheckCircle2 className="h-4 w-4" />
+                      {buttonLabel}
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="h-4 w-4" />
+                      {buttonLabel}
+                      <ArrowRight className="h-4 w-4 ml-auto" />
+                    </>
+                  )}
+                </Button>
+
+                {!sdkReady && (
+                  <p className="text-center text-xs text-slate-500">
+                    A carregar SDK da Meta…
+                  </p>
+                )}
+              </div>
+            )}
+          </>
         )}
       </CardContent>
     </Card>

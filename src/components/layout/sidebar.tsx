@@ -1,12 +1,13 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect } from "react";
-import { cn } from "@/lib/utils";
-import { useAuth } from "@/hooks/use-auth";
-import { useTotalUnread } from "@/hooks/use-total-unread";
-import { isFlowsEnabled } from "@/lib/flows/feature-flag";
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { cn } from '@/lib/utils'
+import { useAuth } from '@/hooks/use-auth'
+import { useTotalUnread } from '@/hooks/use-total-unread'
+import { isFlowsEnabled } from '@/lib/flows/feature-flag'
+import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard,
   MessageSquare,
@@ -19,83 +20,142 @@ import {
   LogOut,
   User,
   X,
-} from "lucide-react";
+  BarChart2,
+} from 'lucide-react'
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@/components/ui/avatar";
+} from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu'
+
+const SUPERADMIN_EMAIL = 'elvessacapuri57@gmail.com'
+
+interface ModulesEnabled {
+  inbox: boolean
+  contacts: boolean
+  pipelines: boolean
+  automations: boolean
+  broadcasts: boolean
+  flows: boolean
+  analytics: boolean
+  embedded_signup: boolean
+}
 
 interface NavItem {
-  href: string;
-  label: string;
-  icon: typeof LayoutDashboard;
+  href: string
+  label: string
+  icon: typeof LayoutDashboard
   /**
    * If set, only included in the rendered nav when the predicate
    * returns true. Used to gate beta-only entries (e.g. /flows) on
    * `profiles.beta_features`.
    */
-  betaKey?: string;
+  betaKey?: string
+  /**
+   * The module key in modules_enabled that controls visibility.
+   */
+  moduleKey?: keyof ModulesEnabled
 }
 
 const navItems: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/inbox", label: "Inbox", icon: MessageSquare },
-  { href: "/contacts", label: "Contacts", icon: Users },
-  { href: "/pipelines", label: "Pipelines", icon: GitBranch },
-  { href: "/broadcasts", label: "Broadcasts", icon: Radio },
-  { href: "/automations", label: "Automations", icon: Zap },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/inbox', label: 'Inbox', icon: MessageSquare, moduleKey: 'inbox' },
+  { href: '/contacts', label: 'Contacts', icon: Users, moduleKey: 'contacts' },
+  { href: '/pipelines', label: 'Pipelines', icon: GitBranch, moduleKey: 'pipelines' },
+  { href: '/broadcasts', label: 'Broadcasts', icon: Radio, moduleKey: 'broadcasts' },
+  { href: '/automations', label: 'Automations', icon: Zap, moduleKey: 'automations' },
   // Flows is gated on the per-account beta flag; the entry is invisible
   // for accounts that haven't opted in. Server-side route guards make
   // this a UX choice, not a security one — the API + pages 404 anyway.
-  { href: "/flows", label: "Flows", icon: Workflow, betaKey: "flows" },
-];
+  { href: '/flows', label: 'Flows', icon: Workflow, betaKey: 'flows', moduleKey: 'flows' },
+]
 
 const bottomNavItems = [
-  { href: "/settings", label: "Settings", icon: Settings },
-];
+  { href: '/settings', label: 'Settings', icon: Settings },
+]
 
 interface SidebarProps {
   /** Controlled on mobile by the Header's hamburger button. Ignored on lg+. */
-  open?: boolean;
-  onClose?: () => void;
+  open?: boolean
+  onClose?: () => void
 }
 
 export function Sidebar({ open = false, onClose }: SidebarProps) {
-  const pathname = usePathname();
-  const { profile, signOut } = useAuth();
-  const totalUnread = useTotalUnread();
+  const pathname = usePathname()
+  const { profile, signOut } = useAuth()
+  const totalUnread = useTotalUnread()
+  const [modules, setModules] = useState<ModulesEnabled | null>(null)
+  const [isSuperadmin, setIsSuperadmin] = useState(false)
 
   // Close the drawer when route changes — users opened it to navigate,
   // so once they pick a destination the drawer should get out of the way.
   useEffect(() => {
-    onClose?.();
+    onClose?.()
     // Only pathname drives this — onClose identity doesn't need to re-run it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+  }, [pathname])
 
   // Lock body scroll and allow Escape to close while the drawer is open on
   // mobile. No-ops on desktop because the sidebar isn't positioned there.
   useEffect(() => {
-    if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    if (!open) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose?.();
-    };
-    window.addEventListener("keydown", onKey);
+      if (e.key === 'Escape') onClose?.()
+    }
+    window.addEventListener('keydown', onKey)
     return () => {
-      document.body.style.overflow = prev;
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [open, onClose]);
+      document.body.style.overflow = prev
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [open, onClose])
+
+  // Fetch modules_enabled from subscription
+  useEffect(() => {
+    let cancelled = false
+    async function fetchModules() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user || cancelled) return
+
+      // Superadmin always sees everything
+      if (user.email === SUPERADMIN_EMAIL) {
+        setIsSuperadmin(true)
+        return
+      }
+
+      const { data: subscription } = await supabase
+        .from('subscriptions')
+        .select('modules_enabled')
+        .eq('user_id', user.id)
+        .single()
+
+      if (!cancelled && subscription?.modules_enabled) {
+        setModules(subscription.modules_enabled as ModulesEnabled)
+      }
+    }
+    fetchModules()
+    return () => { cancelled = true }
+  }, [profile?.email])
+
+  // Determine if a nav item should be visible
+  function isModuleVisible(item: NavItem): boolean {
+    // Superadmin sees everything
+    if (isSuperadmin) return true
+    // If no modules loaded yet, show all (optimistic — middleware handles real enforcement)
+    if (!modules) return true
+    // If no moduleKey, always visible
+    if (!item.moduleKey) return true
+    return modules[item.moduleKey] === true
+  }
 
   return (
     <>
@@ -107,21 +167,21 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
         aria-label="Close menu"
         onClick={onClose}
         className={cn(
-          "fixed inset-0 z-30 bg-slate-950/70 backdrop-blur-sm transition-opacity lg:hidden",
+          'fixed inset-0 z-30 bg-slate-950/70 backdrop-blur-sm transition-opacity lg:hidden',
           open
-            ? "pointer-events-auto opacity-100"
-            : "pointer-events-none opacity-0",
+            ? 'pointer-events-auto opacity-100'
+            : 'pointer-events-none opacity-0',
         )}
       />
 
       <aside
         className={cn(
           // Mobile: fixed drawer that slides in from the left.
-          "fixed inset-y-0 left-0 z-40 flex h-full w-64 flex-col border-r border-slate-800 bg-slate-900",
-          "transition-transform duration-200 ease-out will-change-transform",
-          open ? "translate-x-0" : "-translate-x-full",
+          'fixed inset-y-0 left-0 z-40 flex h-full w-64 flex-col border-r border-slate-800 bg-slate-900',
+          'transition-transform duration-200 ease-out will-change-transform',
+          open ? 'translate-x-0' : '-translate-x-full',
           // Desktop: static, always visible — reset all the mobile framing.
-          "lg:static lg:z-0 lg:w-60 lg:translate-x-0 lg:transition-none",
+          'lg:static lg:z-0 lg:w-60 lg:translate-x-0 lg:transition-none',
         )}
         aria-label="Primary"
       >
@@ -150,19 +210,22 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
         <nav className="flex-1 overflow-y-auto px-3 py-4">
           <ul className="flex flex-col gap-1">
             {navItems.map((item) => {
-              // Per-account beta gate. Today only 'flows' uses this;
-              // extending the navItems list with new betaKeys is a
-              // single-line change.
-              if (item.betaKey === "flows" && !isFlowsEnabled(profile)) {
-                return null;
+              // Per-account beta gate for flows
+              if (item.betaKey === 'flows' && !isFlowsEnabled(profile)) {
+                return null
+              }
+
+              // Module-based visibility gate
+              if (!isModuleVisible(item)) {
+                return null
               }
 
               const isActive =
                 pathname === item.href ||
-                (item.href !== "/dashboard" && pathname.startsWith(item.href));
+                (item.href !== '/dashboard' && pathname.startsWith(item.href))
 
               const showUnreadDot =
-                item.href === "/inbox" && totalUnread > 0 && !isActive;
+                item.href === '/inbox' && totalUnread > 0 && !isActive
 
               return (
                 <li key={item.href}>
@@ -170,17 +233,17 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
                     href={item.href}
                     className={cn(
                       // Taller on mobile so fingers can hit the row reliably (≥44px).
-                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors lg:py-2",
+                      'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors lg:py-2',
                       isActive
-                        ? "bg-violet-500/10 text-violet-500"
-                        : "text-slate-400 hover:bg-slate-800 hover:text-white",
+                        ? 'bg-violet-500/10 text-violet-500'
+                        : 'text-slate-400 hover:bg-slate-800 hover:text-white',
                     )}
                   >
                     <item.icon className="h-4 w-4" />
                     <span className="flex-1">{item.label}</span>
                     {showUnreadDot && (
                       <span
-                        aria-label={`${totalUnread} unread conversation${totalUnread === 1 ? "" : "s"}`}
+                        aria-label={`${totalUnread} unread conversation${totalUnread === 1 ? '' : 's'}`}
                         className="relative flex h-2 w-2"
                       >
                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 opacity-75" />
@@ -189,7 +252,7 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
                     )}
                   </Link>
                 </li>
-              );
+              )
             })}
           </ul>
 
@@ -197,24 +260,42 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
 
           <ul className="flex flex-col gap-1">
             {bottomNavItems.map((item) => {
-              const isActive = pathname.startsWith(item.href);
+              const isActive = pathname.startsWith(item.href)
               return (
                 <li key={item.href}>
                   <Link
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors lg:py-2",
+                      'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors lg:py-2',
                       isActive
-                        ? "bg-violet-500/10 text-violet-500"
-                        : "text-slate-400 hover:bg-slate-800 hover:text-white",
+                        ? 'bg-violet-500/10 text-violet-500'
+                        : 'text-slate-400 hover:bg-slate-800 hover:text-white',
                     )}
                   >
                     <item.icon className="h-4 w-4" />
                     {item.label}
                   </Link>
                 </li>
-              );
+              )
             })}
+
+            {/* Superadmin link — only visible for superadmin */}
+            {isSuperadmin && (
+              <li>
+                <Link
+                  href="/superadmin"
+                  className={cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors lg:py-2',
+                    pathname.startsWith('/superadmin')
+                      ? 'bg-violet-500/10 text-violet-500'
+                      : 'text-violet-400/70 hover:bg-slate-800 hover:text-violet-300',
+                  )}
+                >
+                  <BarChart2 className="h-4 w-4" />
+                  Superadmin
+                </Link>
+              </li>
+            )}
           </ul>
         </nav>
 
@@ -226,21 +307,21 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
                 {profile?.avatar_url ? (
                   <AvatarImage
                     src={profile.avatar_url}
-                    alt={profile.full_name ?? "Avatar"}
+                    alt={profile.full_name ?? 'Avatar'}
                   />
                 ) : null}
                 <AvatarFallback className="bg-violet-500/10 text-sm font-medium text-violet-500">
                   {profile?.full_name?.charAt(0)?.toUpperCase() ??
                     profile?.email?.charAt(0)?.toUpperCase() ??
-                    "U"}
+                    'U'}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-white">
-                  {profile?.full_name ?? "User"}
+                  {profile?.full_name ?? 'User'}
                 </p>
                 <p className="truncate text-xs text-slate-400">
-                  {profile?.email ?? ""}
+                  {profile?.email ?? ''}
                 </p>
               </div>
             </DropdownMenuTrigger>
@@ -287,5 +368,5 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
         </div>
       </aside>
     </>
-  );
+  )
 }

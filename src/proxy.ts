@@ -1,6 +1,21 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+const SUPERADMIN_EMAIL = 'elvessacapuri57@gmail.com'
+
+const PROTECTED_PATHS = [
+  '/dashboard',
+  '/inbox',
+  '/contacts',
+  '/pipelines',
+  '/automations',
+  '/broadcasts',
+  '/flows',
+  '/settings',
+]
+
+const AUTH_PATHS = ['/login', '/signup', '/forgot-password']
+
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
@@ -13,7 +28,9 @@ export async function proxy(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          )
           supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
@@ -24,29 +41,62 @@ export async function proxy(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
+  const { pathname } = request.nextUrl
 
-  // Auth pages - redirect to dashboard if already logged in
-  if (user && (
-    request.nextUrl.pathname === '/login' ||
-    request.nextUrl.pathname === '/signup' ||
-    request.nextUrl.pathname === '/forgot-password'
-  )) {
+  // ─── Auth redirects ────────────────────────────────────────────────────────
+  // If already logged in, bounce away from auth pages
+  if (user && AUTH_PATHS.some((p) => pathname === p)) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)
   }
 
-  // Protected pages - redirect to login if not authenticated
-  const protectedPaths = ['/dashboard', '/inbox', '/contacts', '/pipelines', '/broadcasts', '/automations', '/settings']
-  if (!user && protectedPaths.some(path => request.nextUrl.pathname.startsWith(path))) {
+  // Require auth for protected paths
+  if (!user && PROTECTED_PATHS.some((p) => pathname.startsWith(p))) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  // API routes that need auth (not webhooks)
-  if (!user && request.nextUrl.pathname.startsWith('/api/whatsapp/') &&
-      !request.nextUrl.pathname.includes('/webhook')) {
+  // Superadmin routes — handled by their own layout; skip subscription check
+  if (pathname.startsWith('/superadmin')) {
+    return supabaseResponse
+  }
+
+  // ─── Subscription gate ─────────────────────────────────────────────────────
+  if (user && PROTECTED_PATHS.some((p) => pathname.startsWith(p))) {
+    // Superadmin always passes through
+    if (user.email === SUPERADMIN_EMAIL) {
+      return supabaseResponse
+    }
+
+    const { data: subscription } = await supabase
+      .from('subscriptions')
+      .select('status')
+      .eq('user_id', user.id)
+      .single()
+
+    const status = subscription?.status
+
+    if (status === 'pending' || !status) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/pending'
+      return NextResponse.redirect(url)
+    }
+
+    if (status === 'blocked' || status === 'expired') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/blocked'
+      return NextResponse.redirect(url)
+    }
+  }
+
+  // ─── API protection (non-webhook) ──────────────────────────────────────────
+  if (
+    !user &&
+    pathname.startsWith('/api/whatsapp/') &&
+    !pathname.includes('/webhook')
+  ) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
