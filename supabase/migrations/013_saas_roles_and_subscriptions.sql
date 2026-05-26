@@ -77,6 +77,7 @@ CREATE TABLE IF NOT EXISTS public.access_requests (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name        text NOT NULL,
   email       text NOT NULL,
+  phone       text,
   company     text,
   plan        subscription_plan NOT NULL DEFAULT 'basic',
   message     text,

@@ -9,7 +9,7 @@ const supabase = createClient(
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { name, email, company, plan, message } = body
+    const { name, email, phone, company, plan, message } = body
 
     // Validate required fields
     if (!name || typeof name !== 'string' || name.trim().length < 2) {
@@ -28,6 +28,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Email inválido.' }, { status: 400 })
     }
 
+    if (!phone || typeof phone !== 'string' || phone.trim().length < 5) {
+      return NextResponse.json(
+        { error: 'Telemóvel (WhatsApp) é obrigatório (mínimo 5 caracteres).' },
+        { status: 400 },
+      )
+    }
+
     if (!plan || !['basic', 'medium'].includes(plan)) {
       return NextResponse.json(
         { error: 'Plano inválido. Deve ser "basic" ou "medium".' },
@@ -38,6 +45,7 @@ export async function POST(req: NextRequest) {
     const { error: dbError } = await supabase.from('access_requests').insert({
       name: name.trim(),
       email: email.trim().toLowerCase(),
+      phone: phone.trim(),
       company: company?.trim() || null,
       plan,
       message: message?.trim() || null,

@@ -12,6 +12,7 @@ interface RequestAccessModalProps {
 export function RequestAccessModal({ isOpen, onClose, defaultPlan }: RequestAccessModalProps) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [company, setCompany] = useState('')
   const [plan, setPlan] = useState<'basic' | 'medium'>(defaultPlan ?? 'basic')
   const [message, setMessage] = useState('')
@@ -59,7 +60,7 @@ export function RequestAccessModal({ isOpen, onClose, defaultPlan }: RequestAcce
       const res = await fetch('/api/access-requests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, company, plan, message }),
+        body: JSON.stringify({ name, email, phone, company, plan, message }),
       })
 
       const data = await res.json()
@@ -84,6 +85,7 @@ export function RequestAccessModal({ isOpen, onClose, defaultPlan }: RequestAcce
       setError(null)
       setName('')
       setEmail('')
+      setPhone('')
       setCompany('')
       setMessage('')
     }, 300)
@@ -193,6 +195,22 @@ export function RequestAccessModal({ isOpen, onClose, defaultPlan }: RequestAcce
                     placeholder="you@empresa.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    className="rounded-xl border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-white placeholder:text-slate-600 outline-none transition focus:border-violet-500 focus:ring-1 focus:ring-violet-500/20"
+                  />
+                </div>
+
+                {/* Telemóvel (WhatsApp) */}
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="modal-phone" className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+                    Telemóvel (WhatsApp) <span className="text-violet-400">*</span>
+                  </label>
+                  <input
+                    id="modal-phone"
+                    type="tel"
+                    required
+                    placeholder="+351 912 345 678"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
                     className="rounded-xl border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-white placeholder:text-slate-600 outline-none transition focus:border-violet-500 focus:ring-1 focus:ring-violet-500/20"
                   />
                 </div>

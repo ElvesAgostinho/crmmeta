@@ -47,6 +47,8 @@ export async function PATCH(
     return NextResponse.json({ error: 'Request not found' }, { status: 404 })
   }
 
+  let tempPassword: string | null = null
+
   if (action === 'approve') {
     // Try to find existing user by email
     const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers()
@@ -60,11 +62,12 @@ export async function PATCH(
       userId = existingUser.id
     } else {
       // Create a new user account with a temporary password
-      const tempPassword = Math.random().toString(36).slice(-10) + 'A1!'
+      const generatedPassword = Math.random().toString(36).slice(-10) + 'A1!'
+      tempPassword = generatedPassword
       const { data: newUser, error: createError } =
         await supabaseAdmin.auth.admin.createUser({
           email: accessRequest.email,
-          password: tempPassword,
+          password: generatedPassword,
           email_confirm: true,
           user_metadata: {
             full_name: accessRequest.name,
@@ -121,5 +124,5 @@ export async function PATCH(
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json({ request: data })
+  return NextResponse.json({ request: data, tempPassword })
 }

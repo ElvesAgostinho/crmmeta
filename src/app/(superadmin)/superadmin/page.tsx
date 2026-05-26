@@ -18,6 +18,8 @@ import {
   Loader2,
   RefreshCw,
   Clock,
+  Copy,
+  MessageSquare,
 } from 'lucide-react'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -60,6 +62,7 @@ interface AccessRequest {
   id: string
   name: string
   email: string
+  phone?: string
   company: string
   plan: string
   message: string
@@ -264,16 +267,109 @@ function ExtendDialog({
   )
 }
 
+function CredentialsDialog({
+  credentials,
+  onClose,
+}: {
+  credentials: {
+    email: string
+    name: string
+    phone?: string
+    tempPassword?: string | null
+  }
+  onClose: () => void
+}) {
+  const [copied, setCopied] = useState(false)
+
+  const messageText = `Olá ${credentials.name}!
+
+Temos o prazer de te informar que o teu acesso ao CRM Meta foi aprovado! 🚀
+Aqui estão os teus dados de acesso temporários:
+
+📧 E-mail: ${credentials.email}
+🔑 Palavra-passe temporária: ${credentials.tempPassword ?? 'Senha já existente ou configurada.'}
+
+Acede ao painel aqui:
+🌐 ${window.location.origin}/login
+
+Se tiveres alguma dúvida, estamos à disposição!`
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(messageText)
+    setCopied(true)
+    toast.success('Mensagem copiada para a área de transferência!')
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const cleanPhone = credentials.phone ? credentials.phone.replace(/\D/g, '') : ''
+  const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(messageText)}`
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl">
+        <h3 className="mb-1 text-base font-semibold text-white flex items-center gap-2">
+          <CheckCircle className="h-5 w-5 text-emerald-400" />
+          Acesso Aprovado
+        </h3>
+        <p className="mb-4 text-xs text-slate-400">
+          Copia os dados de acesso provisório abaixo ou envia diretamente via WhatsApp.
+        </p>
+
+        <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-4 font-mono text-xs text-slate-300 whitespace-pre-wrap select-all max-h-48 overflow-y-auto">
+          {messageText}
+        </div>
+
+        <div className="mt-6 flex flex-col gap-3">
+          <div className="flex gap-3">
+            <button
+              onClick={handleCopy}
+              className="flex-1 flex items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-300 transition-colors hover:bg-slate-700 font-medium"
+            >
+              <Copy className="h-4 w-4" />
+              {copied ? 'Copiado!' : 'Copiar Dados'}
+            </button>
+            
+            {credentials.phone && (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-500 text-center"
+              >
+                <MessageSquare className="h-4 w-4" />
+                WhatsApp
+              </a>
+            )}
+          </div>
+          
+          <button
+            onClick={onClose}
+            className="w-full rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-violet-500"
+          >
+            Concluído
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function SuperadminPage() {
-  const [users, setUsers] = useState<UserRecord[]>([])
+  const [users, setUsers] = useState<any[]>([])
   const [requests, setRequests] = useState<AccessRequest[]>([])
   const [settings, setSettings] = useState<AppSetting[]>([])
   const [loading, setLoading] = useState(true)
-  const [modulesUser, setModulesUser] = useState<UserRecord | null>(null)
-  const [extendUser, setExtendUser] = useState<UserRecord | null>(null)
+  const [modulesUser, setModulesUser] = useState<any | null>(null)
+  const [extendUser, setExtendUser] = useState<any | null>(null)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [approvedCredentials, setApprovedCredentials] = useState<{
+    email: string
+    name: string
+    phone?: string
+    tempPassword?: string | null
+  } | null>(null)
 
   const fetchAll = useCallback(async () => {
     setLoading(true)
@@ -306,8 +402,6 @@ export default function SuperadminPage() {
     fetchAll()
   }, [fetchAll])
 
-  // ─── Helpers ───────────────────────────────────────────────────────────────
-
   async function handleRequestAction(id: string, action: 'approve' | 'reject') {
     setActionLoading(`req-${id}-${action}`)
     try {
@@ -318,6 +412,21 @@ export default function SuperadminPage() {
         body: JSON.stringify({ action }),
       })
       if (!res.ok) throw new Error()
+      
+      const responseData = await res.json()
+      
+      if (action === 'approve') {
+        const approvedReq = requests.find(r => r.id === id)
+        if (approvedReq) {
+          setApprovedCredentials({
+            email: approvedReq.email,
+            name: approvedReq.name,
+            phone: approvedReq.phone,
+            tempPassword: responseData.tempPassword,
+          })
+        }
+      }
+      
       toast.success(action === 'approve' ? 'Pedido aprovado!' : 'Pedido rejeitado')
       await fetchAll()
     } catch {
@@ -327,11 +436,7 @@ export default function SuperadminPage() {
     }
   }
 
-  async function handleUserAction(
-    id: string,
-    action: string,
-    extra?: Record<string, unknown>
-  ) {
+  async function handleUserAction(id: string, action: string, extra?: Record<string, unknown>) {
     setActionLoading(`usr-${id}-${action}`)
     try {
       const res = await fetch(`/api/admin/users/${id}`, {
@@ -350,30 +455,7 @@ export default function SuperadminPage() {
     }
   }
 
-  async function handleSaveModules(userId: string, modules: ModulesEnabled) {
-    await handleUserAction(userId, 'block', { modules }) // reuse PATCH with modules
-    // Actually we just want to update modules — use a neutral action
-    setActionLoading(`usr-${userId}-modules`)
-    try {
-      const res = await fetch(`/api/admin/users/${userId}`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'unblock', modules }),
-      })
-      if (res.ok) {
-        toast.success('Módulos atualizados')
-        await fetchAll()
-      }
-    } catch {
-      toast.error('Erro ao atualizar módulos')
-    } finally {
-      setActionLoading(null)
-      setModulesUser(null)
-    }
-  }
-
-  async function handleSaveModulesOnly(userId: string, modules: ModulesEnabled) {
+  async function handleSaveModulesOnly(userId: string, modules: any) {
     setActionLoading(`usr-${userId}-modules`)
     try {
       const res = await fetch(`/api/admin/users/${userId}`, {
@@ -396,7 +478,7 @@ export default function SuperadminPage() {
     }
   }
 
-  async function handleExtend(userId: string, cycle: BillingCycle, count: number) {
+  async function handleExtend(userId: string, cycle: string, count: number) {
     setActionLoading(`usr-${userId}-extend`)
     try {
       const res = await fetch(`/api/admin/users/${userId}`, {
@@ -432,13 +514,9 @@ export default function SuperadminPage() {
     }
   }
 
-  // ─── Derived state ─────────────────────────────────────────────────────────
-
   const pendingRequests = requests.filter((r) => r.status === 'pending')
   const embeddedSignupSetting = settings.find((s) => s.key === 'embedded_signup_enabled')
   const embeddedSignupEnabled = !!embeddedSignupSetting?.value
-
-  // ─── Render ─────────────────────────────────────────────────────────────────
 
   if (loading) {
     return (
@@ -453,14 +531,12 @@ export default function SuperadminPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      {/* Ambient glow */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -top-40 left-1/3 h-80 w-80 rounded-full bg-violet-600/10 blur-3xl" />
         <div className="absolute top-1/2 right-0 h-64 w-64 rounded-full bg-violet-800/8 blur-3xl" />
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* ── Header ── */}
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/20 ring-1 ring-violet-500/30">
@@ -480,7 +556,6 @@ export default function SuperadminPage() {
           </button>
         </div>
 
-        {/* ── Stats row ── */}
         <div className="mb-8 grid gap-4 sm:grid-cols-3">
           <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
             <div className="flex items-center justify-between">
@@ -507,9 +582,6 @@ export default function SuperadminPage() {
           </div>
         </div>
 
-        {/* ══════════════════════════════════════════════════
-            Section 1: Access Requests
-        ══════════════════════════════════════════════════ */}
         <section className="mb-8">
           <div className="mb-4 flex items-center gap-3">
             <Bell className="h-4 w-4 text-amber-400" />
@@ -535,6 +607,9 @@ export default function SuperadminPage() {
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
                         Email
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                        Telemóvel
                       </th>
                       <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 md:table-cell">
                         Empresa
@@ -563,6 +638,7 @@ export default function SuperadminPage() {
                           {req.name || '—'}
                         </td>
                         <td className="px-4 py-3 text-slate-300">{req.email}</td>
+                        <td className="px-4 py-3 text-slate-300">{req.phone || '—'}</td>
                         <td className="hidden px-4 py-3 text-slate-400 md:table-cell">
                           {req.company || '—'}
                         </td>
@@ -618,9 +694,6 @@ export default function SuperadminPage() {
           </div>
         </section>
 
-        {/* ══════════════════════════════════════════════════
-            Section 2: Users
-        ══════════════════════════════════════════════════ */}
         <section className="mb-8">
           <div className="mb-4 flex items-center gap-3">
             <Users className="h-4 w-4 text-violet-400" />
@@ -662,7 +735,6 @@ export default function SuperadminPage() {
                   <tbody className="divide-y divide-slate-800">
                     {users.map((user) => {
                       const sub = user.subscription
-                      const isBlocked = sub?.status === 'blocked'
                       return (
                         <tr
                           key={user.id}
@@ -697,7 +769,6 @@ export default function SuperadminPage() {
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center justify-end gap-1.5">
-                              {/* Ativar (for pending, expired, or null status) */}
                               {(sub?.status === 'pending' || sub?.status === 'expired' || !sub?.status) && (
                                 <button
                                   id={`activate-${user.id}`}
@@ -710,8 +781,6 @@ export default function SuperadminPage() {
                                   <span>Ativar</span>
                                 </button>
                               )}
-
-                              {/* Bloquear (for active or demo status) */}
                               {(sub?.status === 'active' || sub?.status === 'demo') && (
                                 <button
                                   id={`block-${user.id}`}
@@ -724,8 +793,6 @@ export default function SuperadminPage() {
                                   <span className="hidden sm:inline">Bloquear</span>
                                 </button>
                               )}
-
-                              {/* Desbloquear (only for blocked status) */}
                               {sub?.status === 'blocked' && (
                                 <button
                                   id={`unblock-${user.id}`}
@@ -738,8 +805,6 @@ export default function SuperadminPage() {
                                   <span className="hidden sm:inline">Desbloquear</span>
                                 </button>
                               )}
-
-                              {/* Extend */}
                               <button
                                 id={`extend-${user.id}`}
                                 onClick={() => setExtendUser(user)}
@@ -750,8 +815,6 @@ export default function SuperadminPage() {
                                 <Calendar className="h-3 w-3" />
                                 <span className="hidden sm:inline">Estender</span>
                               </button>
-
-                              {/* Modules */}
                               <button
                                 id={`modules-${user.id}`}
                                 onClick={() => setModulesUser(user)}
@@ -774,9 +837,6 @@ export default function SuperadminPage() {
           </div>
         </section>
 
-        {/* ══════════════════════════════════════════════════
-            Section 3: Global Settings
-        ══════════════════════════════════════════════════ */}
         <section>
           <div className="mb-4 flex items-center gap-3">
             <Settings className="h-4 w-4 text-slate-400" />
@@ -809,7 +869,6 @@ export default function SuperadminPage() {
         </section>
       </div>
 
-      {/* ─── Dialogs ── */}
       {modulesUser && (
         <ModulesDialog
           user={modulesUser}
@@ -822,6 +881,12 @@ export default function SuperadminPage() {
           user={extendUser}
           onClose={() => setExtendUser(null)}
           onExtend={(cycle, count) => handleExtend(extendUser.id, cycle, count)}
+        />
+      )}
+      {approvedCredentials && (
+        <CredentialsDialog
+          credentials={approvedCredentials}
+          onClose={() => setApprovedCredentials(null)}
         />
       )}
     </div>
