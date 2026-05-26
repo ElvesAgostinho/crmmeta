@@ -53,7 +53,7 @@ export function Footer() {
         <FooterColumn
           title="Conta"
           links={[
-            { href: '/signup', label: 'Começar' },
+            { href: '/#pricing', label: 'Solicitar Acesso' },
             { href: '/login', label: 'Entrar' },
             { href: '/forgot-password', label: 'Esqueci-me da palavra-passe' },
           ]}

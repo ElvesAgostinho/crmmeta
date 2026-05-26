@@ -41,10 +41,10 @@ export function Hero() {
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link
-              href="/signup"
+              href="/#pricing"
               className="inline-flex items-center gap-2 rounded-lg bg-violet-500 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-violet-400"
             >
-              Começar
+              Solicitar Acesso
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
@@ -58,7 +58,7 @@ export function Hero() {
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-500">
             <span className="flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-violet-500" />
-              Sem cartão de crédito
+              Ativação em 24h
             </span>
             <span className="flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-violet-500" />
