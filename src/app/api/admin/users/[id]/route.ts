@@ -100,6 +100,10 @@ export async function PATCH(
       update.billing_cycle = cycle
       break
     }
+    case 'update_modules': {
+      if (modules) update.modules_enabled = modules
+      break
+    }
     default:
       return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
   }

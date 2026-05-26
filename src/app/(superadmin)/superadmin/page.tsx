@@ -376,13 +376,11 @@ export default function SuperadminPage() {
   async function handleSaveModulesOnly(userId: string, modules: ModulesEnabled) {
     setActionLoading(`usr-${userId}-modules`)
     try {
-      const user = users.find((u) => u.id === userId)
-      const currentStatus = user?.subscription?.status ?? 'active'
       const res = await fetch(`/api/admin/users/${userId}`, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: currentStatus === 'active' ? 'unblock' : currentStatus, modules }),
+        body: JSON.stringify({ action: 'update_modules', modules }),
       })
       if (res.ok) {
         toast.success('Módulos atualizados')
@@ -699,32 +697,47 @@ export default function SuperadminPage() {
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center justify-end gap-1.5">
-                              {/* Block / Unblock */}
-                              <button
-                                id={`toggle-block-${user.id}`}
-                                onClick={() =>
-                                  handleUserAction(
-                                    user.id,
-                                    isBlocked ? 'unblock' : 'block'
-                                  )
-                                }
-                                disabled={!!actionLoading}
-                                title={isBlocked ? 'Desbloquear' : 'Bloquear'}
-                                className={`flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
-                                  isBlocked
-                                    ? 'bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30'
-                                    : 'bg-red-600/20 text-red-400 hover:bg-red-600/30'
-                                }`}
-                              >
-                                {isBlocked ? (
-                                  <Unlock className="h-3 w-3" />
-                                ) : (
+                              {/* Ativar (for pending, expired, or null status) */}
+                              {(sub?.status === 'pending' || sub?.status === 'expired' || !sub?.status) && (
+                                <button
+                                  id={`activate-${user.id}`}
+                                  onClick={() => handleUserAction(user.id, 'approve')}
+                                  disabled={!!actionLoading}
+                                  title="Ativar"
+                                  className="flex items-center gap-1 rounded-lg bg-emerald-500 text-white px-2.5 py-1.5 text-xs font-semibold transition-colors hover:bg-emerald-600 disabled:opacity-50"
+                                >
+                                  <CheckCircle className="h-3 w-3" />
+                                  <span>Ativar</span>
+                                </button>
+                              )}
+
+                              {/* Bloquear (for active or demo status) */}
+                              {(sub?.status === 'active' || sub?.status === 'demo') && (
+                                <button
+                                  id={`block-${user.id}`}
+                                  onClick={() => handleUserAction(user.id, 'block')}
+                                  disabled={!!actionLoading}
+                                  title="Bloquear"
+                                  className="flex items-center gap-1 rounded-lg bg-red-600/20 px-2.5 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-600/30 disabled:opacity-50"
+                                >
                                   <Ban className="h-3 w-3" />
-                                )}
-                                <span className="hidden sm:inline">
-                                  {isBlocked ? 'Desbloquear' : 'Bloquear'}
-                                </span>
-                              </button>
+                                  <span className="hidden sm:inline">Bloquear</span>
+                                </button>
+                              )}
+
+                              {/* Desbloquear (only for blocked status) */}
+                              {sub?.status === 'blocked' && (
+                                <button
+                                  id={`unblock-${user.id}`}
+                                  onClick={() => handleUserAction(user.id, 'unblock')}
+                                  disabled={!!actionLoading}
+                                  title="Desbloquear"
+                                  className="flex items-center gap-1 rounded-lg bg-emerald-600/20 px-2.5 py-1.5 text-xs font-medium text-emerald-400 transition-colors hover:bg-emerald-600/30 disabled:opacity-50"
+                                >
+                                  <Unlock className="h-3 w-3" />
+                                  <span className="hidden sm:inline">Desbloquear</span>
+                                </button>
+                              )}
 
                               {/* Extend */}
                               <button
