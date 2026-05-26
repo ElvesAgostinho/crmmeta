@@ -1,12 +1,25 @@
+'use client'
+
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { Section } from './section'
+
+interface CtaBannerProps {
+  onRequestAccess?: () => void
+}
 
 /**
  * Last push before the footer. Visually distinct (border, gradient
  * background) so it doesn't read as "just another section".
  */
-export function CtaBanner() {
+export function CtaBanner({ onRequestAccess }: CtaBannerProps) {
+  const handleClick = (e: React.MouseEvent) => {
+    if (onRequestAccess) {
+      e.preventDefault()
+      onRequestAccess()
+    }
+  }
+
   return (
     <Section className="py-16 sm:py-20">
       <div
@@ -25,9 +38,10 @@ export function CtaBanner() {
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/signup"
+            onClick={handleClick}
             className="inline-flex items-center gap-2 rounded-lg bg-violet-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-violet-400"
           >
-            Começar grátis
+            Solicitar Acesso
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link

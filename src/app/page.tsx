@@ -98,7 +98,7 @@ export default function LandingPage() {
 
         <Pricing onRequestPlan={handleRequestPlan} />
 
-        <CtaBanner />
+        <CtaBanner onRequestAccess={() => setModalOpen(true)} />
       </main>
       <Footer />
 
