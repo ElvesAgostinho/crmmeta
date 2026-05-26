@@ -98,6 +98,11 @@ export function WhatsAppEmbeddedSignup({ onSuccess, isConnected = false }: Props
   }, [])
 
   const handleConnect = useCallback(() => {
+    if (!APP_ID || APP_ID.trim() === '') {
+      toast.error('Erro: O NEXT_PUBLIC_META_APP_ID não foi detetado no código compilado. Verifica o Easypanel.')
+      return
+    }
+
     if (!sdkReady || !window.FB) {
       toast.error('SDK a carregar, aguarda um momento e tenta novamente.')
       return
@@ -105,67 +110,82 @@ export function WhatsAppEmbeddedSignup({ onSuccess, isConnected = false }: Props
 
     setConnecting(true)
 
-    window.FB.login(
-      async (response) => {
-        // User closed the popup or denied permission.
-        if (!response.authResponse?.code) {
-          setConnecting(false)
-          if (response.status !== 'connected') {
-            toast.error('Ligação cancelada. Abre o popup e autoriza as permissões.')
-          }
-          return
-        }
+    // Safety timeout in case FB SDK silently fails and never calls the callback
+    const fallbackTimeout = setTimeout(() => {
+      setConnecting(false)
+      toast.error('O Facebook bloqueou o popup ou não respondeu. Verifica se tens um AdBlocker ligado ou a consola de erros (F12).')
+    }, 8000)
 
-        try {
-          const res = await fetch('/api/whatsapp/embedded-signup', {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code: response.authResponse.code }),
-          })
+    try {
+      window.FB.login(
+        async (response) => {
+          clearTimeout(fallbackTimeout)
 
-          const data = await res.json() as {
-            success?: boolean
-            error?: string
-            phone_info?: { verified_name?: string; display_phone_number?: string }
-            waba_name?: string
-          }
-
-          if (!res.ok || !data.success) {
-            toast.error(data.error || 'Erro ao ligar o WhatsApp. Tenta novamente.')
+          // User closed the popup or denied permission.
+          if (!response.authResponse?.code) {
             setConnecting(false)
+            if (response.status !== 'connected') {
+              toast.error('Ligação cancelada. Abre o popup e autoriza as permissões.')
+            }
             return
           }
 
-          const label =
-            data.phone_info?.verified_name ||
-            data.phone_info?.display_phone_number ||
-            'WhatsApp Business'
+          try {
+            const res = await fetch('/api/whatsapp/embedded-signup', {
+              method: 'POST',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ code: response.authResponse.code }),
+            })
 
-          toast.success(`✅ ${label} ligado com sucesso!`)
-          setJustConnected(true)
-          onSuccess()
-        } catch (err) {
-          console.error('[embedded-signup] fetch error:', err)
-          toast.error('Erro de rede. Verifica a ligação e tenta novamente.')
-        } finally {
-          setConnecting(false)
-        }
-      },
-      {
-        // Scopes required by the WhatsApp Business API.
-        scope: 'whatsapp_business_management,whatsapp_business_messaging',
-        // Ask for an OAuth code (server exchanges it for the token —
-        // the App Secret never touches the browser).
-        response_type: 'code',
-        override_default_response_type: true,
-        extras: {
-          feature: 'whatsapp_embedded_signup',
-          version: 2,
-          sessionInfoVersion: '3',
+            const data = await res.json() as {
+              success?: boolean
+              error?: string
+              phone_info?: { verified_name?: string; display_phone_number?: string }
+              waba_name?: string
+            }
+
+            if (!res.ok || !data.success) {
+              toast.error(data.error || 'Erro ao ligar o WhatsApp. Tenta novamente.')
+              setConnecting(false)
+              return
+            }
+
+            const label =
+              data.phone_info?.verified_name ||
+              data.phone_info?.display_phone_number ||
+              'WhatsApp Business'
+
+            toast.success(`✅ ${label} ligado com sucesso!`)
+            setJustConnected(true)
+            onSuccess()
+          } catch (err) {
+            console.error('[embedded-signup] fetch error:', err)
+            toast.error('Erro de rede. Verifica a ligação e tenta novamente.')
+          } finally {
+            setConnecting(false)
+          }
         },
-      }
-    )
+        {
+          // Scopes required by the WhatsApp Business API.
+          scope: 'whatsapp_business_management,whatsapp_business_messaging',
+          // Ask for an OAuth code (server exchanges it for the token —
+          // the App Secret never touches the browser).
+          response_type: 'code',
+          override_default_response_type: true,
+          extras: {
+            feature: 'whatsapp_embedded_signup',
+            version: 2,
+            sessionInfoVersion: '3',
+          },
+        }
+      )
+    } catch (e) {
+      clearTimeout(fallbackTimeout)
+      setConnecting(false)
+      toast.error('Ocorreu um erro interno ao chamar o Facebook. Verifica a consola (F12).')
+      console.error(e)
+    }
   }, [sdkReady, onSuccess])
 
   const buttonLabel = justConnected
