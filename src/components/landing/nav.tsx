@@ -103,7 +103,7 @@ export function LandingNav({ onRequestAccess }: LandingNavProps = {}) {
           ) : (
             <Link
               href="/login"
-              className="inline-flex items-center justify-center rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:border-slate-600 hover:text-white"
+              className="inline-flex items-center justify-center rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-violet-500"
             >
               Entrar
             </Link>
@@ -173,21 +173,9 @@ function NavCtas({
     )
   }
 
-  const handleComeca = (e: React.MouseEvent) => {
-    if (onRequestAccess) {
-      e.preventDefault()
-      onRequestAccess()
-    }
-  }
-
   return (
-    <>
-      <Link href="/login" className={secondary}>
-        Entrar
-      </Link>
-      <Link href="/signup" className={primary} onClick={handleComeca}>
-        Começar
-      </Link>
-    </>
+    <Link href="/login" className={primary}>
+      Entrar
+    </Link>
   )
 }
