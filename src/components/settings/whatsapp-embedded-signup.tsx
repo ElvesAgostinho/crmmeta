@@ -29,8 +29,9 @@ declare global {
     FB: {
       init: (config: {
         appId: string
-        autoLogAppEvents: boolean
-        xfbml: boolean
+        cookie?: boolean
+        autoLogAppEvents?: boolean
+        xfbml?: boolean
         version: string
       }) => void
       login: (
@@ -43,9 +44,10 @@ declare global {
           response_type: string
           override_default_response_type: boolean
           extras: {
-            setup: Record<string, unknown>
-            featureType: string
-            sessionInfoVersion: string
+            feature?: string
+            version?: number
+            setup?: Record<string, unknown>
+            sessionInfoVersion?: string
           }
         }
       ) => void
@@ -99,46 +101,46 @@ export function WhatsAppEmbeddedSignup({ onSuccess, isConnected = false }: Props
 
   const handleConnect = useCallback(() => {
     if (!APP_ID || APP_ID.trim() === '') {
-      toast.error('Erro: O NEXT_PUBLIC_META_APP_ID não foi detetado no código compilado. Verifica o Easypanel.')
+      toast.error('Erro: NEXT_PUBLIC_META_APP_ID não foi detetado. Verifica as variáveis de ambiente no Easypanel.')
       return
     }
 
     if (!sdkReady || !window.FB) {
-      toast.error('SDK a carregar, aguarda um momento e tenta novamente.')
+      toast.error('SDK da Meta a carregar, aguarda um momento e tenta novamente.')
       return
     }
 
     setConnecting(true)
 
-    // Safety timeout in case FB SDK silently fails and never calls the callback
+    // Safety timeout — if FB SDK silently fails, unlock the button after 10s
     const fallbackTimeout = setTimeout(() => {
       setConnecting(false)
-      toast.error('O Facebook bloqueou o popup ou não respondeu. Verifica se tens um AdBlocker ligado ou a consola de erros (F12).')
-    }, 8000)
+      toast.error('O Facebook não respondeu (10s). Verifica se tens um AdBlocker ativo ou abre a consola F12 para mais detalhes.')
+    }, 10000)
 
-    try {
-      window.FB.login(
-        (response) => {
-          clearTimeout(fallbackTimeout)
+    window.FB.login(
+      (response) => {
+        clearTimeout(fallbackTimeout)
 
-          // User closed the popup or denied permission.
-          if (!response.authResponse?.code) {
-            setConnecting(false)
-            if (response.status !== 'connected') {
-              toast.error('Ligação cancelada. Abre o popup e autoriza as permissões.')
-            }
-            return
+        // User closed the popup or denied permission.
+        if (!response.authResponse?.code) {
+          setConnecting(false)
+          if (response.status !== 'connected') {
+            toast.error('Ligação cancelada. Abre o popup e autoriza as permissões.')
           }
+          return
+        }
 
-          // FB SDK doesn't support async callbacks natively, so we wrap the async logic
-          void (async () => {
+        const code = response.authResponse.code
 
+        // FB SDK doesn't support async callbacks — wrap in an IIFE
+        void (async () => {
           try {
             const res = await fetch('/api/whatsapp/embedded-signup', {
               method: 'POST',
               credentials: 'include',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ code: response.authResponse.code }),
+              body: JSON.stringify({ code }),
             })
 
             const data = await res.json() as {
@@ -150,7 +152,6 @@ export function WhatsAppEmbeddedSignup({ onSuccess, isConnected = false }: Props
 
             if (!res.ok || !data.success) {
               toast.error(data.error || 'Erro ao ligar o WhatsApp. Tenta novamente.')
-              setConnecting(false)
               return
             }
 
@@ -164,32 +165,23 @@ export function WhatsAppEmbeddedSignup({ onSuccess, isConnected = false }: Props
             onSuccess()
           } catch (err) {
             console.error('[embedded-signup] fetch error:', err)
-            toast.error('Erro de rede. Verifica a ligação e tenta novamente.')
+            toast.error('Erro de rede ao guardar a configuração. Verifica a ligação.')
           } finally {
             setConnecting(false)
           }
-          })() // <-- Execute the async IIFE
+        })()
+      },
+      {
+        scope: 'whatsapp_business_management,whatsapp_business_messaging',
+        response_type: 'code',
+        override_default_response_type: true,
+        extras: {
+          feature: 'whatsapp_embedded_signup',
+          version: 2,
+          sessionInfoVersion: '3',
         },
-        {
-          // Scopes required by the WhatsApp Business API.
-          scope: 'whatsapp_business_management,whatsapp_business_messaging',
-          // Ask for an OAuth code (server exchanges it for the token —
-          // the App Secret never touches the browser).
-          response_type: 'code',
-          override_default_response_type: true,
-          extras: {
-            feature: 'whatsapp_embedded_signup',
-            version: 2,
-            sessionInfoVersion: '3',
-          },
-        }
-      )
-    } catch (e) {
-      clearTimeout(fallbackTimeout)
-      setConnecting(false)
-      toast.error('Ocorreu um erro interno ao chamar o Facebook. Verifica a consola (F12).')
-      console.error(e)
-    }
+      }
+    )
   }, [sdkReady, onSuccess])
 
   const buttonLabel = justConnected
@@ -272,8 +264,8 @@ export function WhatsAppEmbeddedSignup({ onSuccess, isConnected = false }: Props
             <Button
               id="whatsapp-embedded-signup-btn"
               onClick={(e) => {
-                e.preventDefault();
-                handleConnect();
+                e.preventDefault()
+                handleConnect()
               }}
               disabled={connecting || !sdkReady}
               className="w-full h-11 bg-gradient-to-r from-[#25D366] to-[#1aad52] hover:from-[#1ebe5d] hover:to-[#159a48] text-white font-semibold text-sm shadow-lg shadow-green-900/30 transition-all duration-200 gap-2"

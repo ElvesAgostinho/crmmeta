@@ -54,13 +54,13 @@ export async function POST(request: Request) {
     }
 
     // ── Step 1: Exchange code → short-lived access token ───────────────────
-    const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL || ''}`
+    // The redirect_uri MUST exactly match what's configured in Meta App Dashboard.
+    const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '')
+    const redirectUri = siteUrl ? `${siteUrl}/api/whatsapp/embedded-signup` : ''
     const tokenUrl = new URL(`${META_API_BASE}/oauth/access_token`)
     tokenUrl.searchParams.set('client_id', appId)
     tokenUrl.searchParams.set('client_secret', appSecret)
     tokenUrl.searchParams.set('code', code)
-    // Embedded Signup codes don't require a redirect_uri param, but we
-    // include an empty string to satisfy any strict server validation.
     if (redirectUri) tokenUrl.searchParams.set('redirect_uri', redirectUri)
 
     const tokenRes = await fetch(tokenUrl.toString())
