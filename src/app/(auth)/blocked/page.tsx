@@ -1,13 +1,22 @@
-import Link from 'next/link'
-import { ShieldX } from 'lucide-react'
-import type { Metadata } from 'next'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'Conta Bloqueada',
-  robots: { index: false, follow: false },
-}
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { ShieldX, LogOut } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import { useState } from 'react'
 
 export default function BlockedPage() {
+  const router = useRouter()
+  const [loggingOut, setLoggingOut] = useState(false)
+
+  const handleSignOut = async () => {
+    setLoggingOut(true)
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-slate-950 px-4">
       {/* Glow effect */}
@@ -57,13 +66,23 @@ export default function BlockedPage() {
           </div>
         </div>
 
-        {/* Back button */}
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-6 py-3 text-sm font-medium text-white shadow-lg shadow-violet-500/20 transition-all hover:bg-violet-500 hover:shadow-violet-500/30 active:scale-95"
-        >
-          Voltar ao início
-        </Link>
+        {/* Action buttons */}
+        <div className="flex w-full flex-col gap-3">
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-violet-600 px-6 py-3.5 text-sm font-medium text-white shadow-lg shadow-violet-500/20 transition-all hover:bg-violet-500 hover:shadow-violet-500/30 active:scale-95"
+          >
+            Voltar ao início
+          </Link>
+          <button
+            onClick={handleSignOut}
+            disabled={loggingOut}
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-red-500/20 bg-red-950/20 px-6 py-3.5 text-sm font-medium text-red-400 transition-all hover:border-red-500/40 hover:bg-red-950/40 active:scale-95 disabled:opacity-50"
+          >
+            <LogOut className="h-4 w-4" />
+            {loggingOut ? 'A sair...' : 'Sair da conta'}
+          </button>
+        </div>
       </div>
     </div>
   )

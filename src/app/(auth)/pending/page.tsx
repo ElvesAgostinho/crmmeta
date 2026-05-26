@@ -1,7 +1,22 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Clock, Mail, MessageCircle } from 'lucide-react'
+import { Clock, Mail, MessageCircle, LogOut } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import { useState } from 'react'
 
 export default function PendingPage() {
+  const router = useRouter()
+  const [loggingOut, setLoggingOut] = useState(false)
+
+  const handleSignOut = async () => {
+    setLoggingOut(true)
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
+
   return (
     <div
       className="flex min-h-screen items-center justify-center bg-slate-950 px-4"
@@ -99,13 +114,23 @@ export default function PendingPage() {
               </div>
             </div>
 
-            {/* Back button */}
-            <Link
-              href="/"
-              className="mt-8 inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800/60 px-6 py-3 text-sm font-medium text-slate-300 transition-all hover:border-slate-600 hover:bg-slate-800 hover:text-white active:scale-[0.98]"
-            >
-              ← Voltar ao início
-            </Link>
+            {/* Action buttons */}
+            <div className="mt-8 flex w-full flex-col gap-3">
+              <Link
+                href="/"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800/60 px-6 py-3.5 text-sm font-medium text-slate-300 transition-all hover:border-slate-600 hover:bg-slate-800 hover:text-white active:scale-[0.98]"
+              >
+                ← Voltar ao início
+              </Link>
+              <button
+                onClick={handleSignOut}
+                disabled={loggingOut}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-500/20 bg-red-950/20 px-6 py-3.5 text-sm font-medium text-red-400 transition-all hover:border-red-500/40 hover:bg-red-950/40 active:scale-[0.98] disabled:opacity-50"
+              >
+                <LogOut className="h-4 w-4" />
+                {loggingOut ? 'A sair...' : 'Sair da conta'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
