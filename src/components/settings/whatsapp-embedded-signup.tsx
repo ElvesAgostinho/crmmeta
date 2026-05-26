@@ -118,7 +118,7 @@ export function WhatsAppEmbeddedSignup({ onSuccess, isConnected = false }: Props
 
     try {
       window.FB.login(
-        async (response) => {
+        (response) => {
           clearTimeout(fallbackTimeout)
 
           // User closed the popup or denied permission.
@@ -129,6 +129,9 @@ export function WhatsAppEmbeddedSignup({ onSuccess, isConnected = false }: Props
             }
             return
           }
+
+          // FB SDK doesn't support async callbacks natively, so we wrap the async logic
+          void (async () => {
 
           try {
             const res = await fetch('/api/whatsapp/embedded-signup', {
@@ -165,6 +168,7 @@ export function WhatsAppEmbeddedSignup({ onSuccess, isConnected = false }: Props
           } finally {
             setConnecting(false)
           }
+          })() // <-- Execute the async IIFE
         },
         {
           // Scopes required by the WhatsApp Business API.
