@@ -79,9 +79,10 @@ export function WhatsAppEmbeddedSignup({ onSuccess, isConnected = false }: Props
     window.fbAsyncInit = function () {
       window.FB.init({
         appId: APP_ID,
+        cookie: true,
         autoLogAppEvents: true,
         xfbml: true,
-        version: 'v21.0',
+        version: 'v18.0',
       })
       setSdkReady(true)
     }
