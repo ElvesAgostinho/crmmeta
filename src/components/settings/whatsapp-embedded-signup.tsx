@@ -159,9 +159,8 @@ export function WhatsAppEmbeddedSignup({ onSuccess, isConnected = false }: Props
         response_type: 'code',
         override_default_response_type: true,
         extras: {
-          setup: {},
-          featureType: '',
-          // v3 gives us the WABA + phone_number_id in the session info.
+          feature: 'whatsapp_embedded_signup',
+          version: 2,
           sessionInfoVersion: '3',
         },
       }
