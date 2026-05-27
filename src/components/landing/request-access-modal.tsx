@@ -114,23 +114,23 @@ export function RequestAccessModal({ isOpen, onClose, defaultPlan }: RequestAcce
       `}</style>
 
       <div
-        className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl"
+        className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl flex flex-col max-h-[90vh]"
         style={{ animation: 'slideUp 0.25s cubic-bezier(0.16,1,0.3,1)' }}
       >
         {/* Top gradient bar */}
-        <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #7c3aed, #059669)' }} />
+        <div className="h-1 w-full shrink-0" style={{ background: 'linear-gradient(90deg, #7c3aed, #059669)' }} />
 
         {/* Close button */}
         <button
           type="button"
           onClick={handleClose}
-          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-800 hover:text-white"
+          className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-800 hover:text-white"
           aria-label="Fechar"
         >
           <X className="h-4 w-4" />
         </button>
 
-        <div className="px-8 pb-8 pt-7">
+        <div className="px-8 pb-8 pt-7 overflow-y-auto">
           {success ? (
             <div className="flex flex-col items-center py-8 text-center">
               <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/15 ring-1 ring-emerald-500/30">
