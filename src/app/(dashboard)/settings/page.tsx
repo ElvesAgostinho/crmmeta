@@ -1,5 +1,6 @@
-﻿'use client';
+'use client';
 
+import React, { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Settings, MessageSquare, Tag, User } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -17,18 +18,27 @@ function isTabValue(v: string | null): v is TabValue {
   return !!v && (TAB_VALUES as readonly string[]).includes(v);
 }
 
-export default function SettingsPage() {
+function SettingsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // The URL is the single source of truth for the active tab - no
-  // local state, no sync effect. A previous revision duplicated this
-  // into `useState` + a sync effect, which tripped React 19's
-  // set-state-in-effect rule and was also redundant.
   const queryTab = searchParams.get('tab');
-  const tab: TabValue = isTabValue(queryTab) ? queryTab : 'profile';
+  const initialTab = isTabValue(queryTab) ? queryTab : 'profile';
+  
+  // Use synchronous local state so Tabs update immediately on click,
+  // without waiting for the Next.js router transition to complete.
+  const [tab, setTab] = useState<TabValue>(initialTab);
+
+  // Sync state if URL changes (e.g. user hits Back/Forward button)
+  useEffect(() => {
+    const currentUrlTab = isTabValue(queryTab) ? queryTab : 'profile';
+    if (tab !== currentUrlTab) {
+      setTab(currentUrlTab);
+    }
+  }, [queryTab]);
 
   const onChange = (next: TabValue) => {
+    setTab(next);
     const params = new URLSearchParams(searchParams.toString());
     params.set('tab', next);
     router.replace(`/settings?${params.toString()}`, { scroll: false });
@@ -98,4 +108,10 @@ export default function SettingsPage() {
   );
 }
 
-
+export default function SettingsPage() {
+  return (
+    <Suspense fallback={<div className="text-white p-8">A carregar definições...</div>}>
+      <SettingsContent />
+    </Suspense>
+  );
+}
