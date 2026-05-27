@@ -146,23 +146,22 @@ export async function POST(request: Request) {
       console.warn('[embedded-signup] verifyPhoneNumber failed (non-fatal):', err)
     }
 
-    // ── Step 5: Generate a random verify token for the webhook ────────────
-    // This is the token Meta uses to validate our webhook endpoint.
-    // We auto-generate it so the user doesn't have to set it manually.
-    // They'll still need to configure the webhook in Meta Developers console
-    // pointing to their CRM URL, but the verify_token is handled for them.
-    const rawVerifyToken = crypto.randomUUID()
+    // ── Step 5: Check if config already exists for this user ──────────────
+    const { data: existing } = await supabase
+      .from('whatsapp_config')
+      .select('id, verify_token')
+      .eq('user_id', user.id)
+      .maybeSingle()
 
     // ── Step 6: Encrypt secrets and upsert whatsapp_config ────────────────
     const encryptedToken = encrypt(accessToken)
-    const encryptedVerifyToken = encrypt(rawVerifyToken)
-
-    // Check if a config already exists for this user
-    const { data: existing } = await supabase
-      .from('whatsapp_config')
-      .select('id')
-      .eq('user_id', user.id)
-      .maybeSingle()
+    
+    // Only generate a new verify token if the user doesn't already have one
+    let finalEncryptedVerifyToken = existing?.verify_token
+    if (!finalEncryptedVerifyToken) {
+      const rawVerifyToken = crypto.randomUUID()
+      finalEncryptedVerifyToken = encrypt(rawVerifyToken)
+    }
 
     const now = new Date().toISOString()
 
@@ -173,7 +172,7 @@ export async function POST(request: Request) {
           phone_number_id: phoneNumberId,
           waba_id: wabaId,
           access_token: encryptedToken,
-          verify_token: encryptedVerifyToken,
+          verify_token: finalEncryptedVerifyToken,
           status: 'connected',
           connected_at: now,
           updated_at: now,
