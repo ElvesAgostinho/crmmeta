@@ -191,7 +191,7 @@ export async function POST(request: Request) {
           phone_number_id: phoneNumberId,
           waba_id: wabaId,
           access_token: encryptedToken,
-          verify_token: encryptedVerifyToken,
+          verify_token: finalEncryptedVerifyToken,
           status: 'connected',
           connected_at: now,
         })
