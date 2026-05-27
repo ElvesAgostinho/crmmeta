@@ -89,7 +89,16 @@ export async function GET(request: Request) {
       )
     }
 
-    // Fetch all whatsapp configs to check verify tokens
+    // Check global platform verify token first (used for Embedded Signup's single Meta App)
+    const globalVerifyToken = process.env.META_WEBHOOK_VERIFY_TOKEN
+    if (globalVerifyToken && verifyToken === globalVerifyToken) {
+      return new Response(challenge, {
+        status: 200,
+        headers: { 'Content-Type': 'text/plain' },
+      })
+    }
+
+    // Fallback for manual configurations: Fetch all whatsapp configs to check individual verify tokens
     const { data: configs, error: configError } = await supabaseAdmin()
       .from('whatsapp_config')
       .select('id, verify_token')

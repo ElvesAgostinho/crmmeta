@@ -75,7 +75,32 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: `Meta OAuth: ${msg}` }, { status: 400 })
     }
 
-    const accessToken = tokenData.access_token
+    let accessToken = tokenData.access_token
+
+    // ── Step 1.5: Exchange for long-lived access token ─────────────────────
+    // The token from the initial OAuth flow is short-lived (expires in ~1hr).
+    // We must exchange it for a long-lived token to prevent the config from disconnecting.
+    try {
+      const exchangeUrl = new URL(`${META_API_BASE}/oauth/access_token`)
+      exchangeUrl.searchParams.set('grant_type', 'fb_exchange_token')
+      exchangeUrl.searchParams.set('client_id', appId)
+      exchangeUrl.searchParams.set('client_secret', appSecret)
+      exchangeUrl.searchParams.set('fb_exchange_token', accessToken as string)
+
+      const exchangeRes = await fetch(exchangeUrl.toString())
+      const exchangeData = await exchangeRes.json() as {
+        access_token?: string
+        error?: { message?: string }
+      }
+
+      if (exchangeRes.ok && exchangeData.access_token) {
+        accessToken = exchangeData.access_token
+      } else {
+        console.warn('[embedded-signup] long-lived token exchange failed:', exchangeData.error?.message)
+      }
+    } catch (err) {
+      console.warn('[embedded-signup] long-lived token exchange request failed:', err)
+    }
 
     // ── Step 2: Discover WABA ───────────────────────────────────────────────
     const wabaRes = await fetch(

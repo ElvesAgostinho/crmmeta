@@ -82,15 +82,8 @@ export function WhatsAppConfig() {
 
       if (!res.ok) {
         console.error('Failed to load WhatsApp config:', payload);
-        setConfig(null);
-        setPhoneNumberId('');
-        setWabaId('');
-        setAccessToken('');
-        setVerifyToken('');
-        setTokenEdited(false);
-        setConnectionStatus('disconnected');
-        setResetReason(null);
-        setStatusMessage('Não foi possível obter a configuração');
+        setConnectionStatus('unknown');
+        setStatusMessage('Erro de servidor ao obter a configuração');
         return;
       }
 
@@ -101,7 +94,7 @@ export function WhatsAppConfig() {
         setAccessToken(MASKED_TOKEN);
         setVerifyToken('');
         setTokenEdited(false);
-      } else {
+      } else if (payload.reason === 'no_config') {
         setConfig(null);
         setPhoneNumberId('');
         setWabaId('');
@@ -128,15 +121,8 @@ export function WhatsAppConfig() {
     } catch (err) {
       console.error('fetchConfig error:', formatError(err), err);
       toast.error('Não foi possível carregar a configuração do WhatsApp');
-      setConfig(null);
-      setPhoneNumberId('');
-      setWabaId('');
-      setAccessToken('');
-      setVerifyToken('');
-      setTokenEdited(false);
-      setConnectionStatus('disconnected');
-      setResetReason(null);
-      setStatusMessage('');
+      setConnectionStatus('unknown');
+      setStatusMessage('Falha na rede ao contactar o servidor');
     } finally {
       setLoading(false);
     }
