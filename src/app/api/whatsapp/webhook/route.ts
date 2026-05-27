@@ -127,6 +127,7 @@ export async function POST(request: Request) {
     // loudly if a misconfiguration causes signatures to stop matching,
     // rather than silently eating events.
     console.warn('[webhook] rejected request with invalid signature')
+    await supabaseAdmin().from('whatsapp_config').update({ status: 'error: invalid signature (app secret mismatch)' }).neq('id', '00000000-0000-0000-0000-000000000000')
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
   }
 
@@ -160,7 +161,10 @@ async function processWebhook(body: { entry?: WhatsAppWebhookEntry[] }) {
       }
 
       // Handle incoming messages
-      if (!value.messages || !value.contacts) continue
+      if (!value.messages || !value.contacts) {
+        await supabaseAdmin().from('whatsapp_config').update({ status: 'error: payload missing messages' }).neq('id', '00000000-0000-0000-0000-000000000000')
+        continue
+      }
 
       const phoneNumberId = value.metadata.phone_number_id
 
@@ -173,6 +177,7 @@ async function processWebhook(body: { entry?: WhatsAppWebhookEntry[] }) {
 
       if (configError || !config) {
         console.error('No config found for phone_number_id:', phoneNumberId)
+        await supabaseAdmin().from('whatsapp_config').update({ status: 'error: no config for phone ' + phoneNumberId }).neq('id', '00000000-0000-0000-0000-000000000000')
         continue
       }
 
@@ -421,7 +426,10 @@ async function processMessage(
     senderPhone,
     contactName
   )
-  if (!contactOutcome) return
+  if (!contactOutcome) {
+    await supabaseAdmin().from('whatsapp_config').update({ status: 'error: contact outcome failed' }).neq('id', '00000000-0000-0000-0000-000000000000')
+    return
+  }
   const contactRecord = contactOutcome.contact
 
   // Find or create conversation
@@ -429,7 +437,10 @@ async function processMessage(
     userId,
     contactRecord.id
   )
-  if (!conversation) return
+  if (!conversation) {
+    await supabaseAdmin().from('whatsapp_config').update({ status: 'error: conversation outcome failed' }).neq('id', '00000000-0000-0000-0000-000000000000')
+    return
+  }
 
   // Reactions short-circuit here — they aren't messages. We never insert
   // into `messages`, never bump unread_count, never update last_message_text.
@@ -512,6 +523,7 @@ async function processMessage(
 
   if (msgError) {
     console.error('Error inserting message:', msgError)
+    await supabaseAdmin().from('whatsapp_config').update({ status: 'error: msg insert failed: ' + msgError.message }).neq('id', '00000000-0000-0000-0000-000000000000')
     return
   }
 
