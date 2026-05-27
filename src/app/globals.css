@@ -94,3 +94,73 @@
     @apply font-sans;
   }
 }
+
+/* ─── Border Beam Animation ────────────────────────────────────────────────── */
+@keyframes border-beam {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.border-beam-container {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+}
+
+.border-beam-container::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  animation: border-beam 6s linear infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.border-beam-violet::before {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 45deg,
+    #7c3aed 90deg,
+    transparent 135deg,
+    transparent 360deg
+  );
+}
+
+.border-beam-emerald::before {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 45deg,
+    #10b981 90deg,
+    transparent 135deg,
+    transparent 360deg
+  );
+}
+
+.border-beam-mixed::before {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 45deg,
+    #7c3aed 90deg,
+    #10b981 180deg,
+    transparent 225deg,
+    transparent 360deg
+  );
+}
+
+.border-beam-inner {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}

@@ -7,7 +7,7 @@ import { MessageSquare, Search } from 'lucide-react'
  */
 export function InboxMock() {
   return (
-    <div className="w-full overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl">
+    <div className="w-full overflow-hidden rounded-2xl bg-slate-950">
       {/* Fake window chrome — makes the mock read as "a product", not
           an abstract component. */}
       <div className="flex items-center gap-1.5 border-b border-slate-800 bg-slate-900 px-3 py-2">

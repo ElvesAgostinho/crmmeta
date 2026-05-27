@@ -76,17 +76,19 @@ export function FeaturesGrid() {
           return (
             <div
               key={f.title}
-              className="rounded-xl border border-slate-800 bg-slate-900/40 p-6 transition-colors hover:border-slate-700 hover:bg-slate-900/70"
+              className="border-beam-container border-beam-mixed rounded-xl bg-slate-950 p-[1.2px]"
             >
-              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${f.tint}`}>
-                <Icon className="h-5 w-5" />
+              <div className="border-beam-inner bg-slate-900/90 p-6 transition-colors hover:bg-slate-900/95">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${f.tint}`}>
+                  <Icon className="h-5 w-5" />
+                </div>
+                <h3 className="mt-4 text-base font-semibold text-white">
+                  {f.title}
+                </h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-slate-400">
+                  {f.description}
+                </p>
               </div>
-              <h3 className="mt-4 text-base font-semibold text-white">
-                {f.title}
-              </h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-slate-400">
-                {f.description}
-              </p>
             </div>
           )
         })}

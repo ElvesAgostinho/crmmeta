@@ -71,8 +71,10 @@ export function Hero() {
           </div>
         </div>
 
-        <div className="lg:justify-self-end">
-          <InboxMock />
+        <div className="lg:justify-self-end w-full max-w-lg border-beam-container border-beam-mixed rounded-2xl shadow-2xl p-[1.5px]">
+          <div className="border-beam-inner bg-slate-950 rounded-2xl overflow-hidden">
+            <InboxMock />
+          </div>
         </div>
       </div>
     </div>

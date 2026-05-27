@@ -69,145 +69,149 @@ export function Pricing({ onRequestPlan }: PricingProps) {
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-10">
 
           {/* Plano Básico */}
-          <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60 p-8 shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:border-violet-500/50 hover:shadow-violet-500/10">
-            {/* Glow on hover */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-              style={{
-                background:
-                  'radial-gradient(400px circle at 50% -10%, rgb(124 58 237 / 0.08), transparent 70%)',
-              }}
-            />
-
-            {/* Badge */}
-            <div className="mb-6 flex items-start justify-between">
-              <div>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-500/15 px-3 py-1 text-xs font-semibold text-violet-400 ring-1 ring-violet-500/25">
-                  <Star className="h-3 w-3 fill-violet-400" />
-                  Mais Popular
-                </span>
-              </div>
+          <div className="border-beam-container border-beam-violet group relative flex flex-col rounded-2xl bg-slate-950 p-[1.5px] shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-violet-500/15">
+            <div className="border-beam-inner flex flex-col flex-1 rounded-2xl bg-slate-900/90 p-8">
+              {/* Glow on hover */}
               <div
-                className="h-10 w-10 rounded-xl flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, #7c3aed22, #4c1d9522)' }}
-              >
-                <Zap className="h-5 w-5 text-violet-400" />
-              </div>
-            </div>
+                aria-hidden
+                className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                style={{
+                  background:
+                    'radial-gradient(400px circle at 50% -10%, rgb(124 58 237 / 0.08), transparent 70%)',
+                }}
+              />
 
-            {/* Plan name & description */}
-            <h3 className="text-2xl font-bold text-white">Plano Básico</h3>
-            <p className="mt-2 text-sm text-slate-400">
-              Para pequenos negócios que querem começar
-            </p>
-
-            {/* Price */}
-            <div className="mt-6 space-y-2">
-              <div className="flex items-baseline gap-2">
-                <span className="text-sm font-medium text-slate-500">Setup único</span>
-                <span className="text-xl font-bold text-white">15.000 – 35.000 Kz</span>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-sm font-medium text-slate-500">Mensalidade</span>
-                <span className="text-xl font-bold text-violet-300">10.000 – 25.000 Kz</span>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="my-6 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent" />
-
-            {/* Features */}
-            <ul className="flex flex-col gap-3 flex-1">
-              {basicFeatures.map((feature) => (
-                <li key={feature} className="flex items-start gap-3">
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-violet-500/20">
-                    <Check className="h-3 w-3 text-violet-400" />
+              {/* Badge */}
+              <div className="mb-6 flex items-start justify-between">
+                <div>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-500/15 px-3 py-1 text-xs font-semibold text-violet-400 ring-1 ring-violet-500/25">
+                    <Star className="h-3 w-3 fill-violet-400" />
+                    Mais Popular
                   </span>
-                  <span className="text-sm text-slate-300">{feature}</span>
-                </li>
-              ))}
-            </ul>
+                </div>
+                <div
+                  className="h-10 w-10 rounded-xl flex items-center justify-center"
+                  style={{ background: 'linear-gradient(135deg, #7c3aed22, #4c1d9522)' }}
+                >
+                  <Zap className="h-5 w-5 text-violet-400" />
+                </div>
+              </div>
 
-            {/* CTA */}
-            <button
-              type="button"
-              onClick={() => onRequestPlan('basic')}
-              className="mt-8 w-full rounded-xl bg-violet-600 px-6 py-3.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-violet-500 hover:shadow-lg hover:shadow-violet-500/25 active:scale-[0.98]"
-            >
-              Solicitar Plano Básico
-            </button>
+              {/* Plan name & description */}
+              <h3 className="text-2xl font-bold text-white">Plano Básico</h3>
+              <p className="mt-2 text-sm text-slate-400">
+                Para pequenos negócios que querem começar
+              </p>
+
+              {/* Price */}
+              <div className="mt-6 space-y-2">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-sm font-medium text-slate-500">Setup único</span>
+                  <span className="text-xl font-bold text-white">15.000 – 35.000 Kz</span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-sm font-medium text-slate-500">Mensalidade</span>
+                  <span className="text-xl font-bold text-violet-300">10.000 – 25.000 Kz</span>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="my-6 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent" />
+
+              {/* Features */}
+              <ul className="flex flex-col gap-3 flex-1">
+                {basicFeatures.map((feature) => (
+                  <li key={feature} className="flex items-start gap-3">
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-violet-500/20">
+                      <Check className="h-3 w-3 text-violet-400" />
+                    </span>
+                    <span className="text-sm text-slate-300">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA */}
+              <button
+                type="button"
+                onClick={() => onRequestPlan('basic')}
+                className="mt-8 w-full rounded-xl bg-violet-600 px-6 py-3.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-violet-500 hover:shadow-lg hover:shadow-violet-500/25 active:scale-[0.98]"
+              >
+                Solicitar Plano Básico
+              </button>
+            </div>
           </div>
 
           {/* Plano Médio */}
-          <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60 p-8 shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/50 hover:shadow-emerald-500/10">
-            {/* Glow on hover */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-              style={{
-                background:
-                  'radial-gradient(400px circle at 50% -10%, rgb(16 185 129 / 0.08), transparent 70%)',
-              }}
-            />
-
-            {/* Badge */}
-            <div className="mb-6 flex items-start justify-between">
-              <div>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-400 ring-1 ring-emerald-500/25">
-                  <Star className="h-3 w-3 fill-emerald-400" />
-                  Mais Completo
-                </span>
-              </div>
+          <div className="border-beam-container border-beam-emerald group relative flex flex-col rounded-2xl bg-slate-950 p-[1.5px] shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-emerald-500/15">
+            <div className="border-beam-inner flex flex-col flex-1 rounded-2xl bg-slate-900/90 p-8">
+              {/* Glow on hover */}
               <div
-                className="h-10 w-10 rounded-xl flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, #05966922, #06523022)' }}
-              >
-                <Zap className="h-5 w-5 text-emerald-400" />
-              </div>
-            </div>
+                aria-hidden
+                className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                style={{
+                  background:
+                    'radial-gradient(400px circle at 50% -10%, rgb(16 185 129 / 0.08), transparent 70%)',
+                }}
+              />
 
-            {/* Plan name & description */}
-            <h3 className="text-2xl font-bold text-white">Plano Médio</h3>
-            <p className="mt-2 text-sm text-slate-400">
-              Para equipas que precisam de automatizar e escalar
-            </p>
-
-            {/* Price */}
-            <div className="mt-6 space-y-2">
-              <div className="flex items-baseline gap-2">
-                <span className="text-sm font-medium text-slate-500">Setup único</span>
-                <span className="text-xl font-bold text-white">40.000 – 100.000 Kz</span>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-sm font-medium text-slate-500">Mensalidade</span>
-                <span className="text-xl font-bold text-emerald-300">35.000 – 80.000 Kz</span>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="my-6 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent" />
-
-            {/* Features */}
-            <ul className="flex flex-col gap-3 flex-1">
-              {mediumFeatures.map((feature) => (
-                <li key={feature} className="flex items-start gap-3">
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20">
-                    <Check className="h-3 w-3 text-emerald-400" />
+              {/* Badge */}
+              <div className="mb-6 flex items-start justify-between">
+                <div>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-400 ring-1 ring-emerald-500/25">
+                    <Star className="h-3 w-3 fill-emerald-400" />
+                    Mais Completo
                   </span>
-                  <span className="text-sm text-slate-300">{feature}</span>
-                </li>
-              ))}
-            </ul>
+                </div>
+                <div
+                  className="h-10 w-10 rounded-xl flex items-center justify-center"
+                  style={{ background: 'linear-gradient(135deg, #05966922, #06523022)' }}
+                >
+                  <Zap className="h-5 w-5 text-emerald-400" />
+                </div>
+              </div>
 
-            {/* CTA */}
-            <button
-              type="button"
-              onClick={() => onRequestPlan('medium')}
-              className="mt-8 w-full rounded-xl bg-emerald-600 px-6 py-3.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-emerald-500 hover:shadow-lg hover:shadow-emerald-500/25 active:scale-[0.98]"
-            >
-              Solicitar Plano Médio
-            </button>
+              {/* Plan name & description */}
+              <h3 className="text-2xl font-bold text-white">Plano Médio</h3>
+              <p className="mt-2 text-sm text-slate-400">
+                Para equipas que precisam de automatizar e escalar
+              </p>
+
+              {/* Price */}
+              <div className="mt-6 space-y-2">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-sm font-medium text-slate-500">Setup único</span>
+                  <span className="text-xl font-bold text-white">40.000 – 100.000 Kz</span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-sm font-medium text-slate-500">Mensalidade</span>
+                  <span className="text-xl font-bold text-emerald-300">35.000 – 80.000 Kz</span>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="my-6 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent" />
+
+              {/* Features */}
+              <ul className="flex flex-col gap-3 flex-1">
+                {mediumFeatures.map((feature) => (
+                  <li key={feature} className="flex items-start gap-3">
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20">
+                      <Check className="h-3 w-3 text-emerald-400" />
+                    </span>
+                    <span className="text-sm text-slate-300">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA */}
+              <button
+                type="button"
+                onClick={() => onRequestPlan('medium')}
+                className="mt-8 w-full rounded-xl bg-emerald-600 px-6 py-3.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-emerald-500 hover:shadow-lg hover:shadow-emerald-500/25 active:scale-[0.98]"
+              >
+                Solicitar Plano Médio
+              </button>
+            </div>
           </div>
         </div>
 
