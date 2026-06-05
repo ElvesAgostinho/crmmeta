@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -515,12 +515,12 @@ function StepRenderer({
   parentScope: ParentScope
   parentPath: StepPath
 } & Omit<StepListProps, "steps" | "parentPath">) {
-  const path: StepPath = [
-    ...parentPath,
-    parentScope.kind === "root"
-      ? { kind: "root", index }
-      : { kind: "branch", parentCid: parentScope.parentCid, branch: parentScope.branch, index },
-  ]
+  const path: StepPath = parentScope.kind === "root"
+    ? [...parentPath, { kind: "root", index }]
+    : [
+        ...parentPath.slice(0, -1),
+        { kind: "branch", parentCid: parentScope.parentCid, branch: parentScope.branch, index },
+      ]
   const meta = STEP_META[step.step_type]
   const Icon = meta.icon
   const expanded = props.expandedId === step.cid
@@ -980,10 +980,21 @@ function insertAt(
     return copy
   }
   return steps.map((s) => {
-    if (s.cid !== parent.parentCid || !s.branches) return s
-    const list = [...s.branches[parent.branch]]
-    list.splice(index, 0, node)
-    return { ...s, branches: { ...s.branches, [parent.branch]: list } }
+    if (s.cid === parent.parentCid && s.branches) {
+      const list = [...s.branches[parent.branch]]
+      list.splice(index, 0, node)
+      return { ...s, branches: { ...s.branches, [parent.branch]: list } }
+    }
+    if (s.branches) {
+      return {
+        ...s,
+        branches: {
+          yes: insertAt(s.branches.yes, parent, index, node),
+          no: insertAt(s.branches.no, parent, index, node),
+        },
+      }
+    }
+    return s
   })
 }
 
