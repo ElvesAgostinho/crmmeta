@@ -445,11 +445,14 @@ async function evaluateConditionNode(
   run: FlowRunRow,
   cfg: ConditionNodeConfig,
 ): Promise<boolean> {
+  const subject = cfg.subject ?? "var";
+  const operator = cfg.operator ?? "equals";
+
   let subjectValue: string | undefined;
-  if (cfg.subject === "var") {
+  if (subject === "var") {
     const v = run.vars[cfg.subject_key];
     subjectValue = typeof v === "string" ? v : v === undefined ? undefined : String(v);
-  } else if (cfg.subject === "tag") {
+  } else if (subject === "tag") {
     const { count } = await db
       .from("contact_tags")
       .select("contact_id", { count: "exact", head: true })
@@ -475,7 +478,7 @@ async function evaluateConditionNode(
     subjectValue = typeof raw === "string" && raw.length > 0 ? raw : undefined;
   }
   return evaluateConditionPredicate({
-    operator: cfg.operator,
+    operator: operator,
     subjectValue,
     configValue: cfg.value,
   });
