@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 /**
  * Linear-list flow editor.
@@ -360,10 +360,68 @@ export function FlowBuilder({ initialFlow, initialNodes }: FlowBuilderProps) {
   // ---- Node helpers ----
   const updateNode = useCallback(
     (key: string, patch: Partial<BuilderNode>) => {
-      setState((s) => ({
-        ...s,
-        nodes: s.nodes.map((n) => (n.node_key === key ? { ...n, ...patch } : n)),
-      }));
+      setState((s) => {
+        let newNodes = s.nodes.map((n) =>
+          n.node_key === key ? { ...n, ...patch } : n,
+        );
+
+        // If the node's key was renamed, update any other nodes pointing to it
+        if (patch.node_key && patch.node_key !== key) {
+          const oldKey = key;
+          const newKey = patch.node_key;
+          newNodes = newNodes.map((n) => {
+            if (n.node_key === newKey) return n; // the renamed node itself
+            
+            let updatedConfig = { ...n.config };
+            let changed = false;
+
+            if (updatedConfig.next_node_key === oldKey) {
+              updatedConfig.next_node_key = newKey;
+              changed = true;
+            }
+            if (updatedConfig.true_next === oldKey) {
+              updatedConfig.true_next = newKey;
+              changed = true;
+            }
+            if (updatedConfig.false_next === oldKey) {
+              updatedConfig.false_next = newKey;
+              changed = true;
+            }
+            
+            // Buttons
+            if (Array.isArray(updatedConfig.buttons)) {
+              updatedConfig.buttons = updatedConfig.buttons.map((b: any) => {
+                if (b.next_node_key === oldKey) {
+                  changed = true;
+                  return { ...b, next_node_key: newKey };
+                }
+                return b;
+              });
+            }
+
+            // List rows
+            if (Array.isArray(updatedConfig.sections)) {
+              updatedConfig.sections = updatedConfig.sections.map((sec: any) => {
+                if (Array.isArray(sec.rows)) {
+                  const newRows = sec.rows.map((row: any) => {
+                    if (row.next_node_key === oldKey) {
+                      changed = true;
+                      return { ...row, next_node_key: newKey };
+                    }
+                    return row;
+                  });
+                  return { ...sec, rows: newRows };
+                }
+                return sec;
+              });
+            }
+
+            return changed ? { ...n, config: updatedConfig } : n;
+          });
+        }
+
+        return { ...s, nodes: newNodes };
+      });
     },
     [],
   );
